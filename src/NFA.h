@@ -27,8 +27,6 @@ private:
 	//to be used in NFA-DFA conversion
 	set<INPUT_CHAR>* alphabet;
 
-	NFA();
-
 	//private method used to concatenate this NFA with another NFA
 	void join_concatenate(NFA*);
 	//private method used to OR this NFA with another NFA
@@ -40,7 +38,6 @@ private:
 
 public:
 	//Empty NFA Constructor is not allowed
-	//NFA();
 
 	//One Character NFA Constructor
 	NFA(INPUT_CHAR);
@@ -53,6 +50,8 @@ public:
 
 	void apply_star_closure();
 	void apply_plus_closure();
+
+	set<INPUT_CHAR>* get_alphabet();
 
 	virtual ~NFA();
 };

@@ -7,13 +7,9 @@
 
 #include "NFA.h"
 
-//private constructor
-NFA::NFA(){
-	alphabet = new set<INPUT_CHAR>();
-}
 //creates two states with one transition from the first to the second
 NFA::NFA(INPUT_CHAR input_char){
-	NFA();
+	alphabet = new set<INPUT_CHAR>();
 	start_state = new NFA_State();
 	final_state = new NFA_State();
 	start_state->add_transition(input_char,final_state);
@@ -28,7 +24,7 @@ NFA::NFA(INPUT_CHAR input_char){
 
 //creates a linked list like graph of nodes from the given sequence
 NFA::NFA(string sequence){
-	NFA();
+	alphabet = new set<INPUT_CHAR>();
 	start_state = new NFA_State();
 	NFA_State * ptr = start_state;
 	for (unsigned int i = 0; i < sequence.length(); ++i) {
@@ -45,10 +41,11 @@ NFA::NFA(string sequence){
 }
 
 NFA::NFA(INPUT_CHAR start,INPUT_CHAR end){
+
 	//start char must be <= end
 	assert(start <= end);
 
-	NFA();
+	alphabet = new set<INPUT_CHAR>();
 	start_state = new NFA_State();
 	final_state = new NFA_State();
 
@@ -188,6 +185,13 @@ void NFA::join_or(NFA* nfa){
 	this->final_state->set_accepting_pattern("( " + this->final_state->get_accepting_pattern() + " | " + nfa->final_state->get_accepting_pattern()+ " )");
 }
 
+set<INPUT_CHAR>* NFA::get_alphabet(){
+	set<INPUT_CHAR> * alphabet_copy = new set<INPUT_CHAR>();
+	set<INPUT_CHAR>::iterator it;
+	for (it = alphabet->begin(); it != alphabet->end(); it++)
+		alphabet_copy->insert(*it);
+	return alphabet_copy;
+}
 NFA::~NFA() {
 	// TODO Implement the destructor
 	delete alphabet;
