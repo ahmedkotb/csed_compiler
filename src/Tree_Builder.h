@@ -9,6 +9,7 @@
 #define	TREE_BUILDER_H
 
 
+#include <iostream>
 #include<stack.h>
 #include <vector>
 #include <string.h>
@@ -34,11 +35,11 @@ public:
     void gotOper(string opThis, int prec1);
     void gotParen(string ch);
     void scan();
-    void construct_NFA(vector <NFA> in);
     bool isOperator(string token);
-    NFA stringToNFA(vector <string> in);
+    NFA createByBaseCase(string str);
+    NFA stringToNFA(vector <string> *in);
 private:
-    map<string,vector<string> > RDMap;
+    map<string, vector<string> > RDMap;
     stack <NFA> operand_stack;
 
 };
