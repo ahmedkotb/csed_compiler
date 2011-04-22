@@ -119,7 +119,7 @@ NFA_State::~NFA_State() {
 }
 
 
-int main() {
+int main2() {
 	NFA_State *s;
 	NFA_State *v;
 	NFA_State *w;
