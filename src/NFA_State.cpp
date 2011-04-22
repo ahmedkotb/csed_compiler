@@ -7,6 +7,8 @@
 
 #include "NFA_State.h"
 
+map<int, bool> visited;
+
 NFA_State::NFA_State() {
 	//the id will be used as an identifier in the conversion to DFA state
 	id = 0;
@@ -29,10 +31,9 @@ void NFA_State::add_transition(INPUT_CHAR input, NFA_State* state) {
 	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
 		INPUT_CHAR in = iterate->first;
 		NFA_State *s = iterate->second;
-		if(in == input && s == state)
-		{
+		if (in == input && s == state) {
 			transitions->erase(iterate);
-			return;	//no need to insert the duplicated element
+			return; //no need to insert the duplicated element
 		}
 	}
 	transitions->insert(pair<INPUT_CHAR, NFA_State*> (input, state));
@@ -42,9 +43,10 @@ void NFA_State::add_transition(INPUT_CHAR input, NFA_State* state) {
 vector<NFA_State *>* NFA_State::get_transitions(INPUT_CHAR input) {
 
 	//check epsilon input
-	if (input == EPSILON)
+	if (input == EPSILON) {
+		visited.clear();
 		return epislon_closure(this);
-	else
+	} else
 		return get_transitions_helper(input); //normal case
 }
 
@@ -62,11 +64,15 @@ vector<NFA_State *>* NFA_State::get_transitions_helper(INPUT_CHAR input) {
 }
 
 vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
-	cout<< "called    "<<s->id;
+
+	//mark current state as visited using its pointer address
+	visited[(int) s] = true;
+
 	//get first level neighbors
 	vector<NFA_State*> *parent = s->get_transitions_helper(EPSILON);
 
 	vector<NFA_State*>::iterator i, j;
+
 	//base case is when s is accepting state
 	if (s->is_accepting)
 		return parent;
@@ -76,8 +82,8 @@ vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 		NFA_State *s2 = (*iterate);
 
 		//check self loop
-		if (s == s2)
-			return parent;
+		if (s == s2 || visited[(int) s2])
+			continue;
 
 		vector<NFA_State*> *child = epislon_closure(s2);
 
@@ -85,16 +91,16 @@ vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 		parent->insert(parent->end(), child->begin(), child->end());
 
 		//check for duplication
-		removeDuplicates(parent);
+				removeDuplicates(parent);
+
+		return parent;
 
 	}
 	return parent;
 }
 
-
 void NFA_State::set_accepting_pattern(string accepting_pattern) {
 	this->accepting_pattern = accepting_pattern;
-	is_accepting = true;
 }
 
 void NFA_State::set_id(int new_id) {
@@ -105,10 +111,9 @@ string NFA_State::get_accepting_pattern() {
 	return this->accepting_pattern;
 }
 
-vector<INPUT_CHAR>* NFA_State::get_transitions_inputs()
-{
+vector<INPUT_CHAR>* NFA_State::get_transitions_inputs() {
 	vector<INPUT_CHAR> *vec;
-	vec = new vector<INPUT_CHAR>();
+	vec = new vector<INPUT_CHAR> ();
 	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
 		vec->push_back(iterate->first);
 	}
@@ -121,15 +126,16 @@ string NFA_State::show() {
 	string info;
 	cout << "ID = " << (id >= 0 ? id : (int) this) << "\n";
 	cout << "Accepting Pattern = " << accepting_pattern << "\n";
-	 cout << "State Type = " << (is_accepting ? "Accepting" : "Normal") << "\n";
-	 cout << "Regular Expression ID ="
-	 << (token_id >= 0 ? token_id : (int) this) << "\n";
-	 cout << "Transitions :" << "\n";
-	 cout << "-------------" << "\n";
-	 for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
-	 cout << (char) (iterate->first >= 0 ? (iterate->first) : 'E')
-	 << "  =>  " << iterate->second->id << endl;
-	 }
+	cout << "State Type = " << (is_accepting ? "Accepting" : "Normal") << "\n";
+	cout << "Regular Expression ID ="
+			<< (token_id >= 0 ? token_id : (int) this) << "\n";
+	cout << "Transitions :" << "\n";
+	cout << "-------------" << "\n";
+	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
+		cout <<"["<< (char) (iterate->first >= 0 ? (iterate->first) : 'E')
+				<< "  =>  " << iterate->second->id << "] , ";
+	}
+	cout<<endl;
 	return info;
 }
 
@@ -139,10 +145,10 @@ NFA_State::~NFA_State() {
 		iterate->second = 0;
 	}
 	transitions->clear();
+	delete transitions;
 }
 
-
-int main() {
+int main2() {
 	NFA_State *s;
 	NFA_State *v;
 	NFA_State *w;
@@ -159,18 +165,18 @@ int main() {
 	q->set_id(4);
 
 	s->add_transition(EPSILON, v);
-	/*s->add_transition(EPSILON, q);
-	s->add_transition('a', v);
-	s->add_transition('a', v);
-	s->add_transition('a', v);
-	s->add_transition('b', q);
-	s->add_transition('b', q);
-	s->add_transition('b', q);
-	s->add_transition('c', q);*/
-	v->add_transition(EPSILON, s);
-	//s->add_transition(EPSILON, s);
+	s->add_transition(EPSILON, q);
+	 s->add_transition('a', v);
+	 s->add_transition('a', v);
+	 s->add_transition('a', v);
+	 s->add_transition('b', q);
+	 s->add_transition('b', q);
+	 s->add_transition('b', q);
+	 s->add_transition('c', q);
+	 v->add_transition(EPSILON, s);
+	 s->add_transition(EPSILON, s);
 	//s->show() ;
-	v->add_transition('b', s);
+	 v->add_transition(EPSILON, w);
 	//v->set_accepting_pattern("ssss");
 	//v->show();
 
@@ -178,24 +184,32 @@ int main() {
 	//vector <INPUT_CHAR> *v2 = v->get_transitions_inputs();
 
 	vector<NFA_State*> *vec = s->get_transitions(EPSILON);
+
 	//cout << "returned" << endl;
 	//vector<INPUT_CHAR>::iterator iterate2;
 	vector<NFA_State*>::iterator iterate2;
 
 	/*for (iterate2 = v2->begin(); iterate2 != v2->end(); ++iterate2) {
-		INPUT_CHAR c = (*iterate2);
-		if(c == -1)
-			cout << "EPSILON"<<" , ";
-		else
-			cout << char(c)<<" , ";
-	}*/
-
+	 INPUT_CHAR c = (*iterate2);
+	 if(c == -1)
+	 cout << "EPSILON"<<" , ";
+	 else
+	 cout << char(c)<<" , ";
+	 }*/
+	cout <<"result"<<endl;
 	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
 		NFA_State *s = (*iterate2);
-		s->show();
+		cout << s->show()<<endl;
 	}
+
+	vec = s->get_transitions(EPSILON);
+	cout <<"result2"<<endl;
+	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
+			NFA_State *s = (*iterate2);
+			cout << s->show()<<endl;
+		}
+
 
 	return 0;
 }
-
 
