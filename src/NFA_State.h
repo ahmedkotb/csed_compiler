@@ -35,6 +35,11 @@ private:
 		      std::sort(vec->begin(), vec->end());
 		      vec->erase(std::unique(vec->begin(), vec->end()), vec->end());
 		  }
+		void removeDuplicates2(std::vector<INPUT_CHAR> *vec)
+				  {
+				      std::sort(vec->begin(), vec->end());
+				      vec->erase(std::unique(vec->begin(), vec->end()), vec->end());
+				  }
 
 
 public:
@@ -52,6 +57,10 @@ public:
 	void set_id(int);
 	void set_accepting_pattern(string);
 	string get_accepting_pattern();
+
+	//return a vector of all input participating in transition
+	vector<INPUT_CHAR>* get_transitions_inputs();
+
 	virtual ~NFA_State();
 };
 
