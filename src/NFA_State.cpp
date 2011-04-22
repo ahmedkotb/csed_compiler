@@ -26,9 +26,9 @@ void NFA_State::add_transition(INPUT_CHAR input,NFA_State * state){
 	//TODO implement this method
 }
 
-vector<NFA_State *> NFA_State::get_transitions(INPUT_CHAR input){
+vector<NFA_State *>* NFA_State::get_transitions(INPUT_CHAR input){
 	//TODO implement this method
-	vector<NFA_State *> result;
+	vector<NFA_State *> * result = new vector<NFA_State *>();
 	return result;
 }
 

@@ -30,7 +30,7 @@ public:
 	void add_transition(INPUT_CHAR,NFA_State *);
 
 	//get transition with specified input
-	vector<NFA_State *> get_transitions(INPUT_CHAR);
+	vector<NFA_State *> *get_transitions(INPUT_CHAR);
 
 	void set_accepting_pattern(string);
 	string get_accepting_pattern();

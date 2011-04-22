@@ -21,7 +21,9 @@ NFA::NFA(INPUT_CHAR input_char){
 	//add the character to the NFA alphabet
 	alphabet->insert(input_char);
 	//set the accepting pattern of the final state
-	final_state->set_accepting_pattern("" + input_char);
+	stringstream ss;
+	ss << input_char;
+	final_state->set_accepting_pattern(ss.str());
 }
 
 //creates a linked list like graph of nodes from the given sequence
@@ -50,21 +52,20 @@ NFA::NFA(INPUT_CHAR start,INPUT_CHAR end){
 	start_state = new NFA_State();
 	final_state = new NFA_State();
 
-	string acc_pattern = "";
+	stringstream acc_pattern_stream;
 	for (INPUT_CHAR i = start; i <= end; ++i) {
 		start_state->add_transition(i,final_state);
 		//generate accepting pattern
 		if (i == end)
-			acc_pattern += i;
+			acc_pattern_stream << i;
 		else
-			acc_pattern += i + " | ";
-
+			acc_pattern_stream << i << " | ";
 		//update the alphabet
 		alphabet->insert(i);
 	}
 
 	//set the accepting pattern of the final string to the OR of all characters
-	final_state->set_accepting_pattern(acc_pattern);
+	final_state->set_accepting_pattern(acc_pattern_stream.str());
 }
 
 
@@ -113,8 +114,46 @@ void NFA::join(NFA* nfa,int join_type){
 		join_concatenate(nfa);
 }
 
-void NFA::join_concatenate(NFA* nfa){
+//make a bfs traversal of the 2nd graph and pre-appends the given pattern to each of the states accepting patterns
+void NFA::concatenate_pattern(NFA * nfa,string pattern){
 	//TODO implement this method
+//	set<NFA_State *> visited;
+//	queue<NFA_State *> queue;
+//	visited.insert(nfa->start_state);
+//	queue.push(nfa->start_state);
+//	NFA_State * state;
+//	while (!queue.empty()){
+//		state = queue.front();
+//		queue.pop();
+//		state->set_accepting_pattern(pattern + state->get_accepting_pattern());
+//	}
+}
+
+void NFA::join_concatenate(NFA* nfa){
+	//TODO revise this , and check for copy problem
+	//STEPS
+	//1 - copy nfa .. or not ?
+	//2 - join final state in this nfa with the start state in the given nfa with epsilon transition
+	//3 - union alphabet
+	//4 - Accepting pattern :
+	//  --- there is a problem here . all the acc_pattern of the states of the 2nd graph will need to be changed
+	//  --- Suggested solution , traverse the 2nd graph and edit the accepting pattern
+	//  --- but since accepting_pattern is not needed for the program to work correctly (used only for debugging)
+	//  --- we can enable it just during the coding phase and disable it when we finish so that join_concatenate
+	//  --- remains o(1) instead of o(n) where n is the number of states in the 2nd nfa
+	//----------------------------------------------------
+
+	//1
+	// this implementation doesn't copy the second nfa
+	//2
+	this->final_state->add_transition(EPSILON,nfa->start_state);
+	//3
+	set<INPUT_CHAR>::iterator it;
+	for (it = nfa->alphabet->begin(); it != nfa->alphabet->end(); it++)
+		this->alphabet->insert(*it);
+	//4 fix the accepting pattern
+	//disable the following code in the project final phase
+	concatenate_pattern(nfa,this->final_state->get_accepting_pattern());
 }
 
 void NFA::join_or(NFA* nfa){

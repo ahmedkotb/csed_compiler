@@ -14,7 +14,9 @@
 
 #include "NFA_State.h"
 #include <set>
+#include <queue>
 #include <assert.h>
+#include <sstream>
 
 class NFA {
 private:
@@ -27,8 +29,15 @@ private:
 
 	NFA();
 
+	//private method used to concatenate this NFA with another NFA
 	void join_concatenate(NFA*);
+	//private method used to OR this NFA with another NFA
 	void join_or(NFA*);
+
+	//private method used to traverse the given graph and preappend the given string
+	//to the beginning accepting pattern of each state
+	void concatenate_pattern(NFA*,string);
+
 public:
 	//Empty NFA Constructor is not allowed
 	//NFA();
