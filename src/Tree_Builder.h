@@ -10,9 +10,9 @@
 
 
 #include <iostream>
-#include<stack.h>
+#include <stack>
 #include <vector>
-#include <string.h>
+#include <string>
 #include "NFA.h"
 //Constants
 #define RE 0
@@ -45,4 +45,3 @@ private:
 };
 
 #endif	/* TREE_BUILDER_H */
-
