@@ -39,7 +39,7 @@ public:
     NFA createByBaseCase(string str);
     NFA stringToNFA(vector <string> *in);
 private:
-    map<string, vector<string> > keyWordMap;
+    map<string, string > keyWordMap;
     map<string, vector<string> > RDMap;
     stack <NFA> operand_stack;
 
