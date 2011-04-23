@@ -31,9 +31,9 @@ using namespace std;
 class Parser {
 public:
     stack <string> op_Stack;
-    vector <string>output;
-    Parser(vector <string> in);
-    vector <string> input;
+    vector <string>*output;
+    Parser(vector <string>* in);
+    vector <string>* input;
     Parser();
     virtual ~Parser();
     void gotOper(string opThis, int prec1);
@@ -45,8 +45,8 @@ public:
     void split(string line);
     bool isSpecialChar(char c);
 private:
-    map<string, string > keyWordMap;
-    map<string, vector<string> > RDMap;
+    set<string >* keyWordMap;
+    map<string, vector<string> >* RDMap;
     stack <NFA*> operand_stack;
 };
 

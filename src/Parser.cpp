@@ -15,14 +15,20 @@ char special_char[SPECIAL_NUM] = { '{', '}', '[', ']', '|', '=', ':', '+', '*',
 		'(', ')' };
 //The tokens of the input line
 
-Parser::Parser(vector<string> in) {
+Parser::Parser(vector<string>* in) {
 	input = in;
 }
 
 Parser::Parser() {
+	 this->output = new vector<string>();
+	 this->RDMap = new map<string,vector<string> >();
+	 this->keyWordMap = new set<string>();
 }
 
 Parser::~Parser() {
+	delete(this->RDMap);
+	delete(this->keyWordMap);
+	delete(this->output);
 }
 
 void Parser::gotOper(string opThis, int prec1) {
@@ -45,7 +51,7 @@ void Parser::gotOper(string opThis, int prec1) {
 				op_Stack.push(opTop);
 				break;
 			} else
-				output.push_back(opTop);
+				output->push_back(opTop);
 		}
 	}
 	op_Stack.push(opThis);
@@ -58,24 +64,25 @@ void Parser::gotParen(string ch) {
 		if (chx == "(")
 			break;
 		else
-			output.push_back(chx);
+			output->push_back(chx);
 	}
 }
 
 void Parser::scan() {
-
-	if (input[0] == "{" || input[1] == "[") {
-		for (int j = 2; j < input.size(); j++) {
-			keyWordMap[input[j]] = input[j];
+	//Clear the output vectro if is used previously in RD or RE
+	output->clear();
+	if ((*input)[0] == "{" || (*input)[1] == "[") {
+		for (unsigned int j = 2; j < (*input).size(); j++) {
+			keyWordMap->insert((*input)[j]);
 		}
 	}
 	int type = 0;
-	if (input[1] == ":")
+	if ((*input)[1] == ":")
 		type = RE;
 	else
 		type = RD;
-	for (int j = 2; j < input.size(); j++) {
-		string ch = input.at(j);
+	for (unsigned int j = 2; j < (*input).size(); j++) {
+		string ch = input->at(j);
 		if (ch == " ") {
 			gotOper(ch, 2);
 		} else if (ch == "*" || ch == "+") {
@@ -87,27 +94,29 @@ void Parser::scan() {
 		} else if (ch == ")") {
 			gotParen(ch); // go pop operators
 		} else { // write it to output
-			output.push_back(ch);
+			output->push_back(ch);
 		}
 	}
 	while (!op_Stack.empty()) {
-		output.push_back(op_Stack.top());
+		output->push_back(op_Stack.top());
 		op_Stack.pop();
 	}
 
 	//cout << output[0] << endl;
 	switch (type) {
 	case RE:
-		stringToNFA(&output);
+		stringToNFA(output);
 		break;
 	default: //Insert the RD in the RDMap
 	{
-		string rd = input[0];
-		RDMap[rd] = output;
+		string rd = (*input)[0];
+		(*RDMap)[rd] = *output;
 		break;
 	}
 	}
-	NFA *x = stringToNFA(&output);
+	//clear the input vector to be ready for use in the next RD or RE
+	input->clear();
+	NFA *x = stringToNFA(output);
 	x->debug();
 }
 
@@ -134,8 +143,8 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 		string cur = in->at(i);
 		if (!isOperator(cur)) //This is an operand
 		{
-			map<string, vector<string> >::iterator it = RDMap.find(cur);
-			if (it == RDMap.end()) //This is a sequence or Range .....Base case
+			map<string, vector<string> >::iterator it = RDMap->find(cur);
+			if (it == RDMap->end()) //This is a sequence or Range .....Base case
 			{
 				NFA *nfa = createByBaseCase(cur);
 				operand_stack.push(nfa);
@@ -168,11 +177,9 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 				//Get the first element
 				NFA * nfa1 = operand_stack.top();
 				operand_stack.pop();
-				cout << "here " << operand_stack.size() << endl;
 				//Get the second element
 				NFA * nfa2 = operand_stack.top();
 				operand_stack.pop();
-				cout << "here " << operand_stack.size() << endl;
 				//Join
 				nfa1->join(nfa2, operation);
 				operand_stack.push(nfa1);
@@ -204,7 +211,8 @@ void Parser::split(string line) {
 	bool isRHS = false; //To indicate if the RHS is proccessed now or not yet
 	bool lastIsSpace = false;
 	string str;
-	vector<string> tokens;
+	vector<string>* tokens = new vector<string>();
+
 	for (unsigned int i = 0; i < line.length(); i++) {
 		cur_char = line[i];
 		if (isSpecialChar(cur_char)) //current char is special char and is inserted directly
@@ -212,7 +220,7 @@ void Parser::split(string line) {
 			lastIsSpace = false;
 			if (end >= st && look_back) //Storing the accumulated string
 			{
-				tokens.push_back(line.substr(st, end - st + 1));
+				tokens->push_back(line.substr(st, end - st + 1));
 				st = end + 1;
 				look_back = false;
 			}
@@ -221,10 +229,10 @@ void Parser::split(string line) {
 			if (cur_char == '(' && isRHS) {
 				if (!isSpecialChar(lastChar) || lastChar == '+' || lastChar
 						== '*' || lastChar == ')')
-					tokens.push_back(CONCATINATION_SYMBOL);
+					tokens->push_back(CONCATINATION_SYMBOL);
 			}
 			str = cur_char;
-			tokens.push_back(str);
+			tokens->push_back(str);
 			st++;
 			end++;
 			if (str == "=" || str == ":")
@@ -234,17 +242,17 @@ void Parser::split(string line) {
 		{
 			if (end >= st && look_back) //Storing the accumulated string
 			{
-				tokens.push_back(line.substr(st, end - st + 1));
+				tokens->push_back(line.substr(st, end - st + 1));
 				st = end + 1;
 				look_back = false;
 			}
 			if (isRHS) {
 				if (!isSpecialChar(lastChar) || lastChar == '+' || lastChar
 						== '*' || lastChar == ')')
-					tokens.push_back(CONCATINATION_SYMBOL);
+					tokens->push_back(CONCATINATION_SYMBOL);
 			}
 			str = cur_char + line[++i];
-			tokens.push_back(str); //pushing the current character and the next one
+			tokens->push_back(str); //pushing the current character and the next one
 			st += 2;
 			end += 2;
 			lastChar = '\\' + line[i];
@@ -252,7 +260,7 @@ void Parser::split(string line) {
 		} else if (cur_char == ' ' || cur_char == '\t') {
 			lastIsSpace = true;
 			if (end >= st && look_back) {
-				tokens.push_back(line.substr(st, end - st + 1));
+				tokens->push_back(line.substr(st, end - st + 1));
 				st = end + 2;
 				end++;
 				look_back = false;
@@ -265,15 +273,15 @@ void Parser::split(string line) {
 			look_back = true;
 			if (isSpecialChar(lastChar)) {
 				if (lastChar == '+' || lastChar == '*' || lastChar == ')')
-					tokens.push_back(" ");
+					tokens->push_back(" ");
 			} else //The last character is not a special character
 			{
 				if (lastIsSpace && isRHS)
-					tokens.push_back(" ");
+					tokens->push_back(" ");
 			}
 
 			if (i == line.length() - 1) {
-				tokens.push_back(line.substr(st, end - st + 1));
+				tokens->push_back(line.substr(st, end - st + 1));
 			}
 			lastChar = cur_char;
 			lastIsSpace = false;
@@ -281,24 +289,25 @@ void Parser::split(string line) {
 	}
 	input = tokens;
 	scan();
+	delete(tokens);
 }
 
-//int main() {
-//	string line;
-//	Parser p;
-//	ifstream in_file("input file.txt");
-//	if (in_file.is_open()) {
-//		while (!in_file.eof()) {
-//			getline(in_file, line);
-//			cout << line << endl;
-//			if (line == "")
-//				break;
-//			p.split(line);
-//		}
-//		in_file.close();
-//	} else
-//		cout << "Unable to open file";
-//	cout << "----------------------" << endl;
-//
-//	return 0;
-//}
+int main() {
+	string line;
+	Parser p;
+	ifstream in_file("input file.txt");
+	if (in_file.is_open()) {
+		while (!in_file.eof()) {
+			getline(in_file, line);
+			cout << line << endl;
+			if (line == "")
+				break;
+			p.split(line);
+		}
+		in_file.close();
+	} else
+		cout << "Unable to open file";
+	cout << "----------------------" << endl;
+
+	return 0;
+}
