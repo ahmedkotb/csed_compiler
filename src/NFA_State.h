@@ -19,6 +19,7 @@ private:
 	string accepting_pattern;
 	bool is_accepting;
 	int token_id;
+
 	multimap<INPUT_CHAR, NFA_State*> *transitions;
 	multimap<INPUT_CHAR, NFA_State*>::iterator iterate;
 	pair<multimap<INPUT_CHAR, NFA_State*>::iterator, multimap<INPUT_CHAR,
@@ -49,10 +50,12 @@ public:
 	//get transition with specified input
 	vector<NFA_State *>* get_transitions(INPUT_CHAR);
 
-	//print state info
-	string show();
+	//returns state information
+	string get_description();
 
 	void set_id(int);
+	int get_id();
+	void set_token_id(int);
 	void set_accepting_pattern(string);
 	string get_accepting_pattern();
 	vector<INPUT_CHAR>* get_transitions_inputs();

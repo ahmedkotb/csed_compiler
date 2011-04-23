@@ -12,8 +12,8 @@ map<int, bool> visited;
 NFA_State::NFA_State() {
 	//the id will be used as an identifier in the conversion to DFA state
 	id = 0;
-	//EPSILON is considered the accepting pattern for a new state ( \L == EPSILON )
-	accepting_pattern = "\L";
+	//EPSILON is considered the accepting pattern for a new state
+	accepting_pattern = "";
 
 	//state is not considered (Token Acceptor) at creation
 	is_accepting = false;
@@ -107,6 +107,15 @@ void NFA_State::set_id(int new_id) {
 	id = new_id;
 }
 
+int NFA_State::get_id(){
+	return this->id;
+}
+void NFA_State::set_token_id(int token_id){
+	//marks this state as accepting state with the given token id
+	this->is_accepting = true;
+	this->token_id = token_id;
+}
+
 string NFA_State::get_accepting_pattern() {
 	return this->accepting_pattern;
 }
@@ -121,22 +130,31 @@ vector<INPUT_CHAR>* NFA_State::get_transitions_inputs() {
 	return vec;
 }
 
-//print state informations
-string NFA_State::show() {
-	string info;
-	cout << "ID = " << (id >= 0 ? id : (int) this) << "\n";
-	cout << "Accepting Pattern = " << accepting_pattern << "\n";
-	cout << "State Type = " << (is_accepting ? "Accepting" : "Normal") << "\n";
-	cout << "Regular Expression ID ="
-			<< (token_id >= 0 ? token_id : (int) this) << "\n";
-	cout << "Transitions :" << "\n";
-	cout << "-------------" << "\n";
-	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
-		cout <<"["<< (char) (iterate->first >= 0 ? (iterate->first) : 'E')
-				<< "  =>  " << iterate->second->id << "] , ";
+//returns state information
+string NFA_State::get_description() {
+	stringstream info;
+	info << "----------------------------------------------\n";
+	info << "State ID = " << (id >= 0 ? id : (int) this)  << "\n";
+	info << "Accepting Pattern = " << accepting_pattern << "\n";
+	if (is_accepting)
+		info << "State Type = ACCEPTING Token with ID = " << token_id << "\n";
+	else
+		info << "State Type = Normal\n";
+
+	if (transitions->size() > 0){
+		info << "Transitions :\n";
+		info << "=============\n";
+		string input;
+		for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
+			if (iterate->first >= 0)
+				input =(char)iterate->first;
+			else
+				input = "EPSILON";
+			info << "[" << input << "  =>  " << iterate->second->id << "] , ";
+		}
+		info << "\n";
 	}
-	cout<<endl;
-	return info;
+	return info.str();
 }
 
 NFA_State::~NFA_State() {
@@ -199,14 +217,16 @@ int main2() {
 	cout <<"result"<<endl;
 	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
 		NFA_State *s = (*iterate2);
-		cout << s->show()<<endl;
+		cout << s->get_description();
+		//cout << s->show()<<endl;
 	}
 
 	vec = s->get_transitions(EPSILON);
 	cout <<"result2"<<endl;
 	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
 			NFA_State *s = (*iterate2);
-			cout << s->show()<<endl;
+			cout << s->get_description();
+			//cout << s->show()<<endl;
 		}
 
 

@@ -24,6 +24,7 @@ private:
 	NFA_State * start_state;
 	NFA_State * final_state;
 
+	int states_count;
 	//to be used in NFA-DFA conversion
 	set<INPUT_CHAR>* alphabet;
 
@@ -35,6 +36,10 @@ private:
 	//private method used to traverse the given graph and preappend the given string
 	//to the beginning accepting pattern of each state
 	void concatenate_pattern(NFA*,string);
+
+	//private method used to number the states of the NFA
+	//it gives each state a unique id starting from 0
+	void number_states();
 
 public:
 	//Empty NFA Constructor is not allowed
@@ -52,6 +57,14 @@ public:
 	void apply_plus_closure();
 
 	set<INPUT_CHAR>* get_alphabet();
+	int get_states_count();
+
+	//set the final state of the NFA as accepting state and assign the give token ID to it
+	void finalize_NFA(int);
+
+	//for debugging purpose
+	//prints the entire NFA
+	void debug();
 
 	virtual ~NFA();
 };
