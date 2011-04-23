@@ -9,7 +9,10 @@
 
 //creates two states with one transition from the first to the second
 NFA::NFA(INPUT_CHAR input_char){
+
 	alphabet = new set<INPUT_CHAR>();
+	combined_NFA = false;
+
 	start_state = new NFA_State();
 	final_state = new NFA_State();
 	start_state->add_transition(input_char,final_state);
@@ -25,8 +28,10 @@ NFA::NFA(INPUT_CHAR input_char){
 
 //creates a linked list like graph of nodes from the given sequence
 NFA::NFA(string sequence){
-	states_count = 0;
+
 	alphabet = new set<INPUT_CHAR>();
+	combined_NFA = false;
+
 	start_state = new NFA_State();
 	NFA_State * ptr = start_state;
 	for (unsigned int i = 0; i < sequence.length(); ++i) {
@@ -48,8 +53,9 @@ NFA::NFA(INPUT_CHAR start,INPUT_CHAR end){
 	//start char must be <= end
 	assert(start <= end);
 
-	states_count = 0;
 	alphabet = new set<INPUT_CHAR>();
+	combined_NFA = false;
+
 	start_state = new NFA_State();
 	final_state = new NFA_State();
 
@@ -190,6 +196,7 @@ void NFA::number_states(){
 }
 
 void NFA::debug(){
+	cout << "NFA Type : "  << (combined_NFA ? "Combined NFA" : "Normal") << endl;
 	cout << "Number of States : " << this->states_count << endl;
 	cout << "Alphabet : ";
 	set<INPUT_CHAR>::iterator it;
@@ -315,8 +322,48 @@ int NFA::get_states_count(){
 	return this->states_count;
 }
 
+bool NFA::is_combined_NFA(){
+	return combined_NFA;
+}
+
 void NFA::finalize_NFA(int token_id){
 	this->final_state->set_token_id(token_id);
+}
+
+NFA* NFA::create_combined_NFA(vector<NFA*> * single_nfa_vector){
+	//Steps
+	//1-create a new start state and initialize its variable (set the combined state boolean to true)
+	//2-Combine
+	//2.1-add epsilon transitions to start state of each nfa
+	//2.2-set combined nfa alphabet to union alphabet of each nfa
+	//2.3-set combined nfa state_count to sum of state_count of each nfa
+
+	//1
+	NFA* new_combined_NFA = new NFA(EPSILON);
+	//TODO this part need to be fixed , why i can't use the default constructor !!
+	delete new_combined_NFA->alphabet;
+	delete new_combined_NFA->start_state;
+	//delete new_combined_NFA->final_state;
+	//----------
+	NFA_State* new_start_state = new NFA_State();
+	new_combined_NFA->combined_NFA = true;
+	new_combined_NFA->alphabet = new set<INPUT_CHAR>();
+	new_combined_NFA->start_state = new_start_state;
+	new_combined_NFA->final_state = 0;
+	new_combined_NFA->states_count= 1;
+	//2.0
+	for (unsigned int i = 0; i < single_nfa_vector->size(); ++i) {
+		//2.1
+		new_start_state->add_transition(EPSILON,single_nfa_vector->at(i)->start_state);
+		//2.2
+		set<INPUT_CHAR>::iterator it;
+		for (it = single_nfa_vector->at(i)->alphabet->begin(); it != single_nfa_vector->at(i)->alphabet->end(); it++)
+			new_combined_NFA->alphabet->insert(*it);
+		//2.3
+		new_combined_NFA->states_count+= single_nfa_vector->at(i)->states_count;
+	}
+
+	return new_combined_NFA;
 }
 
 NFA::~NFA() {

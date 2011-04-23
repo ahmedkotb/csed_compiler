@@ -29,5 +29,15 @@ int main() {
 	//nfa accept the pattern (x | y | z | b)c
 	nfa1.debug();
 
+	cout << "===================================================" << endl;
+	NFA nfaA('a');
+	nfaA.finalize_NFA(0);
+	NFA nfaB('b');
+	nfaB.finalize_NFA(1);
+	vector<NFA*> vector;
+	vector.push_back(&nfaA);
+	vector.push_back(&nfaB);
+	NFA * combined = NFA::create_combined_NFA(&vector);
+	combined->debug();
 	return 0;
 }

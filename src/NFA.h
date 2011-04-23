@@ -24,7 +24,13 @@ private:
 	NFA_State * start_state;
 	NFA_State * final_state;
 
+	//holds number of states in this NFA
 	int states_count;
+
+	//combined NFA are a special case of nfa as it has many accepting states
+	//and can't be joined with other nfa(s)
+	bool combined_NFA;
+
 	//to be used in NFA-DFA conversion
 	set<INPUT_CHAR>* alphabet;
 
@@ -41,6 +47,7 @@ private:
 	//it gives each state a unique id starting from 0
 	void number_states();
 
+
 public:
 	//Empty NFA Constructor is not allowed
 
@@ -56,8 +63,10 @@ public:
 	void apply_star_closure();
 	void apply_plus_closure();
 
+	//getters
 	set<INPUT_CHAR>* get_alphabet();
 	int get_states_count();
+	bool is_combined_NFA();
 
 	//set the final state of the NFA as accepting state and assign the give token ID to it
 	void finalize_NFA(int);
@@ -66,6 +75,8 @@ public:
 	//prints the entire NFA
 	void debug();
 
+	//static method used to create combined NFA of group of NFA(s)
+	static NFA* create_combined_NFA(vector<NFA*> *);
 	virtual ~NFA();
 };
 
