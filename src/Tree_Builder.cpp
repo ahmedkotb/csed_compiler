@@ -58,7 +58,7 @@ void Tree_Builder::gotParen(string ch) {
 }
 
 void Tree_Builder::scan() {
-    
+
     if (input[0] == "{" || input[1] == "[") {
         for (int j = 2; j < input.size(); j++) {
             keyWordMap[input[j]] = input[j];
@@ -107,7 +107,6 @@ void Tree_Builder::scan() {
 bool Tree_Builder::isOperator(string token) {
     for (int i = 0; i < OPERATOR_NUM; i++) {
         if (token == operators[i])
-
             return true;
     }
     return false;
