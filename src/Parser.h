@@ -40,14 +40,14 @@ public:
     void gotParen(string ch);
     void scan();
     bool isOperator(string token);
-    NFA createByBaseCase(string str);
-    NFA stringToNFA(vector <string> *in);
+    NFA *createByBaseCase(string str);
+    NFA *stringToNFA(vector <string> *in);
     void split(string line);
     bool isSpecialChar(char c);
 private:
     map<string, string > keyWordMap;
     map<string, vector<string> > RDMap;
-    stack <NFA> operand_stack;
+    stack <NFA*> operand_stack;
 };
 
 #endif	/* TREE_BUILDER_H */

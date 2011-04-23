@@ -20,7 +20,7 @@ public:
     vector<NFA_State *> * mov(NFA_State* current_state, char input_character);
 
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
-    create_DFA_state(NFA_State* states);
+    void create_DFA_state(NFA_State* states);
 private:
 
     NFA_State * start_state;
