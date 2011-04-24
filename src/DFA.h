@@ -9,6 +9,7 @@
 #define	DFA_H
 
 #include "NFA_State.h"
+#include "NFA.h"
 
 class DFA {
 public:
@@ -20,7 +21,19 @@ public:
     vector<NFA_State *> * mov(NFA_State* current_state, char input_character);
 
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
-    void create_DFA_state(NFA_State* states);
+    NFA_State* create_DFA_state(NFA_State* states);
+
+    // return DFA start state
+    NFA_State* get_start_state();
+
+    // return the IDs of the given NFA states
+    vector<int> get_IDS(vector<NFA_State*>* states);
+
+    // takes a victor of integer and return an integer representing the result of hashing
+    int hash(vector<int> ids);
+
+    // takes NFA and converts it to DFA
+    DFA* convert_NFA_to_DFA(NFA* nfa);
 private:
 
     NFA_State * start_state;
@@ -37,4 +50,3 @@ private:
 };
 
 #endif	/* DFA_H */
-
