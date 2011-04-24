@@ -19,7 +19,7 @@ DFA::DFA(const DFA& orig) {
 DFA::~DFA() {
 }
 
-vector<NFA_State *> * DFA:: mov(NFA_State* current_state, char input_character){
+vector<NFA_State *> * DFA:: mov(NFA_State* current_state, INPUT_CHAR input_character){
     return current_state->get_transitions(input_character);
 }
 
