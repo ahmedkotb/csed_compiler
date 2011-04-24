@@ -39,7 +39,7 @@ private:
     NFA_State * start_state;
 
     //holds all input alphabet
-    vector <char> alphabet;
+    vector <INPUT_CHAR> alphabet;
 
     //hashmap returns a DFA state representing the given ids of NFA states
     multimap <vector<int*>, NFA_State*> states_IDS;
