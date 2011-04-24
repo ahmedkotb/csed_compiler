@@ -7,6 +7,13 @@
 
 #include "NFA.h"
 
+//creates empty nfa
+NFA::NFA(){
+	alphabet = new set<INPUT_CHAR>();
+	combined_NFA = false;
+	states_count = 0;
+}
+
 //creates two states with one transition from the first to the second
 NFA::NFA(INPUT_CHAR input_char){
 
@@ -78,6 +85,9 @@ NFA::NFA(INPUT_CHAR start,INPUT_CHAR end){
 
 
 void NFA::apply_plus_closure(){
+	//plus closure can't be applied to combined NFA
+	assert(combined_NFA == false);
+
 	NFA_State* new_start_state = new NFA_State();
 	NFA_State* new_final_state = new NFA_State();
 
@@ -114,6 +124,9 @@ void NFA::apply_star_closure(){
 //joins the given NFA with this NFA
 //TWO types of join exist NFA_JOIN_OR , NFA_JOIN_CONCATENATION
 void NFA::join(NFA* nfa,int join_type){
+	//join can't be applied to combined NFA
+	assert(combined_NFA == false);
+
 	//check for null pointer
 	assert(nfa != 0);
 	//check for invalid join_type
@@ -339,22 +352,15 @@ NFA* NFA::create_combined_NFA(vector<NFA*> * single_nfa_vector){
 	//2.3-set combined nfa state_count to sum of state_count of each nfa
 
 	//1
-	NFA* new_combined_NFA = new NFA(EPSILON);
-	//TODO this part need to be fixed , why i can't use the default constructor !!
-	delete new_combined_NFA->alphabet;
-	delete new_combined_NFA->start_state;
-	//delete new_combined_NFA->final_state;
-	//----------
-	NFA_State* new_start_state = new NFA_State();
+	NFA* new_combined_NFA = new NFA();
 	new_combined_NFA->combined_NFA = true;
-	new_combined_NFA->alphabet = new set<INPUT_CHAR>();
-	new_combined_NFA->start_state = new_start_state;
-	new_combined_NFA->final_state = 0;
+	new_combined_NFA->start_state = new NFA_State();
+	new_combined_NFA->final_state = NULL;
 	new_combined_NFA->states_count= 1;
 	//2.0
 	for (unsigned int i = 0; i < single_nfa_vector->size(); ++i) {
 		//2.1
-		new_start_state->add_transition(EPSILON,single_nfa_vector->at(i)->start_state);
+		new_combined_NFA->start_state->add_transition(EPSILON,single_nfa_vector->at(i)->start_state);
 		//2.2
 		set<INPUT_CHAR>::iterator it;
 		for (it = single_nfa_vector->at(i)->alphabet->begin(); it != single_nfa_vector->at(i)->alphabet->end(); it++)

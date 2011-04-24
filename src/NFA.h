@@ -47,9 +47,10 @@ private:
 	//it gives each state a unique id starting from 0
 	void number_states();
 
+	//Empty NFA Constructor is private only
+	NFA();
 
 public:
-	//Empty NFA Constructor is not allowed
 
 	//One Character NFA Constructor
 	NFA(INPUT_CHAR);
