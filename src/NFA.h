@@ -79,8 +79,7 @@ public:
         // return the start state of the NFA
         NFA_State* get_start_state();
 
-        // return the alphabet
-        set<INPUT_CHAR>* get_alphabet();
+        
 
 	//static method used to create combined NFA of group of NFA(s)
 	static NFA* create_combined_NFA(vector<NFA*> *);

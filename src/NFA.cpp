@@ -380,9 +380,6 @@ NFA_State* NFA::get_start_state() {
     return this->start_state;
 }
 
-set<INPUT_CHAR>* NFA::get_alphabet() {
-    return this->alphabet;
-}
 
 NFA::~NFA() {
     // TODO Implement the destructor
