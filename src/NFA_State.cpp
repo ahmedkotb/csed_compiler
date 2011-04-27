@@ -70,6 +70,7 @@ vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 
 	//get first level neighbors
 	vector<NFA_State*> *parent = s->get_transitions_helper(EPSILON);
+        parent->push_back(s);
 
 	vector<NFA_State*>::iterator i, j;
 
@@ -91,7 +92,7 @@ vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 		parent->insert(parent->end(), child->begin(), child->end());
 
 		//check for duplication
-				removeDuplicates(parent);
+		removeDuplicates(parent);
 
 		return parent;
 
@@ -166,7 +167,7 @@ NFA_State::~NFA_State() {
 	delete transitions;
 }
 
-int main2() {
+int main() {
 	NFA_State *s;
 	NFA_State *v;
 	NFA_State *w;
@@ -192,7 +193,7 @@ int main2() {
 	 s->add_transition('b', q);
 	 s->add_transition('c', q);
 	 v->add_transition(EPSILON, s);
-	 s->add_transition(EPSILON, s);
+	 //s->add_transition(EPSILON, s);
 	//s->show() ;
 	 v->add_transition(EPSILON, w);
 	//v->set_accepting_pattern("ssss");
@@ -222,10 +223,10 @@ int main2() {
 	}
 
 	vec = s->get_transitions(EPSILON);
-	cout <<"result2"<<endl;
+	//cout <<"result2"<<endl;
 	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
 			NFA_State *s = (*iterate2);
-			cout << s->get_description();
+	//		cout << s->get_description();
 			//cout << s->show()<<endl;
 		}
 
