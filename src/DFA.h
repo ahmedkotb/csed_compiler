@@ -14,6 +14,7 @@
 class DFA {
 public:
     DFA();
+    DFA(NFA* nfa);
     DFA(const DFA& orig);
     virtual ~DFA();
 
@@ -21,7 +22,7 @@ public:
     vector<NFA_State *> * mov(NFA_State* current_state, INPUT_CHAR input_character);
 
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
-    NFA_State* create_DFA_state(NFA_State* states);
+    NFA_State* create_DFA_state(vector<NFA_State*>* states);
 
     // return DFA start state
     NFA_State* get_start_state();
@@ -34,18 +35,24 @@ public:
 
     // takes NFA and converts it to DFA
     DFA* convert_NFA_to_DFA(NFA* nfa);
+
+    //method used to number the states of the DFA
+    //it gives each state a unique id starting from 0
+    void number_states();
+
+       
+
 private:
+
+    // return DFA
+    DFA* get_DFA(vector<NFA_State*>* states,NFA* nfa);
+
 
     NFA_State * start_state;
 
-    //holds all input alphabet
-    vector <INPUT_CHAR> alphabet;
-
     //hashmap returns a DFA state representing the given ids of NFA states
-    multimap <vector<int*>, NFA_State*> states_IDS;
-
-    //vector for all DFA states
-    vector<NFA_State*>* all_states;
+    map <int, NFA_State*> states_IDS;
+    map <int, NFA_State*>::iterator iterator;
 
 };
 
