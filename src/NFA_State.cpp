@@ -64,40 +64,35 @@ vector<NFA_State *>* NFA_State::get_transitions_helper(INPUT_CHAR input) {
 }
 
 vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
+	//visited states
+	set<NFA_State *> visited;
+	visited.insert(s);
+	//bfs queue
+	queue<NFA_State*> queue;
+	queue.push(s);
 
-	//mark current state as visited using its pointer address
-	visited[(int) s] = true;
+	NFA_State * current_state;
 
-	//get first level neighbors
-	vector<NFA_State*> *parent = s->get_transitions_helper(EPSILON);
-        parent->push_back(s);
-
-	vector<NFA_State*>::iterator i, j;
-
-	//base case is when s is accepting state
-	if (s->is_accepting)
-		return parent;
-
-	vector<NFA_State*>::iterator iterate;
-	for (iterate = parent->begin(); iterate != parent->end(); ++iterate) {
-		NFA_State *s2 = (*iterate);
-
-		//check self loop
-		if (s == s2 || visited[(int) s2])
-			continue;
-
-		vector<NFA_State*> *child = epislon_closure(s2);
-
-		//merge parent and child
-		parent->insert(parent->end(), child->begin(), child->end());
-
-		//check for duplication
-		removeDuplicates(parent);
-
-		return parent;
-
+	while (!queue.empty()){
+		current_state = queue.front();
+		queue.pop();
+		//Neighbors
+		vector <NFA_State *> * transitions = current_state->get_transitions_helper(EPSILON);
+		for(unsigned int i = 0; i<transitions->size();i++){
+			if (visited.find(transitions->at(i)) == visited.end()){
+				//a new state was found
+				visited.insert(transitions->at(i));
+				queue.push(transitions->at(i));
+			}
+		}
+		delete transitions;
 	}
-	return parent;
+	//Why not return set instead of having to copy the set into a vector !!!
+	vector <NFA_State *> * result = new vector<NFA_State *>();
+    set<NFA_State *>::iterator it;
+    for (it = visited.begin(); it != visited.end(); it++)
+        result->push_back(*(it));
+    return result;
 }
 
 void NFA_State::set_accepting_pattern(string accepting_pattern) {

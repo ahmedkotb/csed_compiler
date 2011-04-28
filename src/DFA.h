@@ -13,7 +13,7 @@
 
 class DFA {
 public:
-    DFA();
+
     DFA(NFA* nfa);
     DFA(const DFA& orig);
     virtual ~DFA();
@@ -28,7 +28,7 @@ public:
     vector<int> get_IDS(vector<NFA_State*>* states);
 
     // takes a victor of integer and return an integer representing the result of hashing
-    int hash(vector<int> ids);
+    int hash(vector<int> *ids);
 
     //method used to number the states of the DFA
     //it gives each state a unique id starting from 0
@@ -37,7 +37,22 @@ public:
     //describes the entire DFA
     void debug();
 
+    //get number of states in this DFA
+    int get_states_count();
+
+    //get alphabet of this DFA
+    set<INPUT_CHAR>* get_alphabet();
+
 private:
+    //constructor is private
+    DFA();
+
+    //number of states in the DFA
+    int states_count;
+
+    //alphabet of this DFA
+    set<INPUT_CHAR> * alphabet;
+
     // mov method which takes a state and input character and returns a vector of the transitions
     vector<NFA_State *> * mov(NFA_State* current_state, INPUT_CHAR input_character);
 

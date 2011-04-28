@@ -8,23 +8,31 @@
 #include "DFA.h"
 
 DFA::DFA() {
-
     start_state = new NFA_State();
 }
 
 DFA::DFA(NFA* nfa) {
 
-    start_state = new NFA_State();
+	//initialize state count and alphabet
+	this->states_count = 0;
+	this->alphabet = new set<INPUT_CHAR>();
+
+	//make a copy of nfa alphabet except for EPSILON
+    set<INPUT_CHAR>::iterator it;
+    set<INPUT_CHAR> * nfa_alphabet = nfa->get_alphabet();
+    for (it = nfa_alphabet->begin(); it != nfa_alphabet->end(); it++){
+    	if (*it != EPSILON)
+    		alphabet->insert(*it);
+    }
+
     //nfa states must be numbered before conversion
     nfa->number_states();
 
     convert_NFA_to_DFA(nfa);
 }
 
-DFA::DFA(const DFA& orig) {
-}
-
 DFA::~DFA() {
+	delete alphabet;
 }
 
 vector<NFA_State *> * DFA::mov(NFA_State* current_state, INPUT_CHAR input_character) {
@@ -46,15 +54,13 @@ vector<int> DFA::get_IDS(vector<NFA_State*>* states) {
     return ids;
 }
 
-int DFA::hash(vector<int> ids) {
+int DFA::hash(vector<int>* ids) {
     int hash = 0;
-    for (unsigned int i = 0; i < ids.size(); i++) {
-        hash += ids[i];
+    for (unsigned int i = 0; i < ids->size(); i++) {
+        hash += ids->at(i);
         hash *= 37;
     }
-
     return hash;
-
 }
 
 NFA_State* DFA::create_DFA_state(vector<NFA_State*>* states) {
@@ -70,8 +76,10 @@ NFA_State* DFA::create_DFA_state(vector<NFA_State*>* states) {
 }
 
 void DFA::convert_NFA_to_DFA(NFA* nfa) {
-    if(nfa->get_states_count()!=0)
-    	get_DFA(nfa->get_start_state()->get_transitions(EPSILON), nfa);
+	vector <NFA_State *> * start_states = nfa->get_start_state()->get_transitions(EPSILON);
+    assert (nfa->get_states_count()!=0);
+    get_DFA(start_states, nfa);
+    delete start_states;
 }
 
 void DFA::number_states() {
@@ -114,19 +122,22 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
 
     // vector holding the ids of the states
     vector<int> ids = this->get_IDS(states);
-    map <int, NFA_State*>::iterator iterator = states_IDS.find(this->hash(ids));
+    int hash = this->hash(&ids);
+    map <int, NFA_State*>::iterator iterator = states_IDS.find(hash);
 
     NFA_State * current;
     if (iterator == states_IDS.end()) {
 
         current = create_DFA_state(states);
-        states_IDS.insert(pair<int, NFA_State*>(this->hash(ids), current));
+        ++this->states_count;
+        states_IDS.insert(pair<int, NFA_State*>(hash, current));
 
     } else {
         current = iterator->second;
     }
 
-    if (states_IDS.size() == 1) {// only one DFA state was saved
+    // only one DFA state was saved
+    if (states_IDS.size() == 1) {
         this->start_state = current;
     }
 
@@ -152,17 +163,19 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
             }
         }
 
-        if (cell->size() != 0) { // new states appeared in the table and needs new row
+        // new states appeared in the table and needs new row
+        if (cell->size() != 0) {
             vector<int> ids = this->get_IDS(cell);
-            iterator = states_IDS.find(this->hash(ids));
+            int hash = this->hash(&ids);
+            iterator = states_IDS.find(hash);
 
             NFA_State* going;
             if (iterator == states_IDS.end()) {
                 going = create_DFA_state(states);
+                ++this->states_count;
                 // add state to current row
                 row_new_states->push_back(cell);
-                states_IDS.insert(pair<int, NFA_State*>(this->hash(ids), going));
-
+                states_IDS.insert(pair<int, NFA_State*>(hash, going));
             } else {
                 going = iterator->second;
             }
@@ -170,7 +183,8 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
         }
     }
 
-    for (unsigned int i = 0; i < row_new_states->size(); i++) {// loop through all DFA states in a table row and repeat the algorithm
+    // loop through all DFA states in a table row and repeat the algorithm
+    for (unsigned int i = 0; i < row_new_states->size(); i++) {
         this->get_DFA(row_new_states->at(i), nfa);
     }
 
@@ -178,17 +192,24 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
     delete row_new_states;
 }
 
+int DFA::get_states_count(){
+	return this->states_count;
+}
+
+set<INPUT_CHAR>* DFA::get_alphabet(){
+	return this->alphabet;
+}
 void DFA::debug() {
-//    cout << "Number of States : " << this->states_count << endl;
-//    cout << "Alphabet : ";
-//    set<INPUT_CHAR>::iterator it;
-//    for (it = alphabet->begin(); it != alphabet->end(); it++) {
-//        if (*it == -1)
-//            cout << "EPSILON , ";
-//        else
-//            cout << (char) (*it) << " , ";
-//    }
-//    cout << endl;
+    cout << "Number of States : " << this->states_count << endl;
+    cout << "Alphabet : ";
+    set<INPUT_CHAR>::iterator it;
+    for (it = alphabet->begin(); it != alphabet->end(); it++) {
+        if (*it == -1)
+            cout << "EPSILON , ";
+        else
+            cout << (char) (*it) << " , ";
+    }
+    cout << endl;
     cout << "States :" << endl;
     //give numbers to states
     this->number_states();
