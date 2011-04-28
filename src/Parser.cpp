@@ -10,25 +10,38 @@
 #include "Parser.h"
 using namespace std;
 string operators[OPERATOR_NUM] = { "*", "+", "|", " " };
-//The specail chars
+//The special chars
 char special_char[SPECIAL_NUM] = { '{', '}', '[', ']', '|', '=', ':', '+', '*',
 		'(', ')' };
 //The tokens of the input line
 
-Parser::Parser(vector<string>* in) {
-	input = in;
-}
+//Parser::Parser(vector<string>* in) {
+//	input = in;
+//}
 
 Parser::Parser() {
 	 this->output = new vector<string>();
-	 this->RDMap = new map<string,vector<string> >();
+	 this->RDMap = new map<string,vector<string>* >();
 	 this->keyWordMap = new set<string>();
+	 this->punctuation = new vector<string>();
+	 this->RE_names = new vector<string>();
+	 this->RE_list = new vector<vector<string>*>();
+	 this->lan_tokens = new vector<string>();
+	 this->NFAS = new vector<NFA*>();
 }
 
 Parser::~Parser() {
 	delete(this->RDMap);
 	delete(this->keyWordMap);
 	delete(this->output);
+}
+
+vector <NFA*>* Parser::getNFAS(){
+	return this->NFAS;
+}
+
+vector<string>* Parser::getTokens(){
+	return this->lan_tokens;
 }
 
 void Parser::gotOper(string opThis, int prec1) {
@@ -68,21 +81,11 @@ void Parser::gotParen(string ch) {
 	}
 }
 
-void Parser::scan() {
-	//Clear the output vectro if is used previously in RD or RE
+NFA* Parser::get_post_fix(string name , vector<string>* value,bool isRD) {
+	//Clear the output vector if is used previously in RD or RE
 	output->clear();
-	if ((*input)[0] == "{" || (*input)[1] == "[") {
-		for (unsigned int j = 2; j < (*input).size(); j++) {
-			keyWordMap->insert((*input)[j]);
-		}
-	}
-	int type = 0;
-	if ((*input)[1] == ":")
-		type = RE;
-	else
-		type = RD;
-	for (unsigned int j = 2; j < (*input).size(); j++) {
-		string ch = input->at(j);
+	for (unsigned int j = 0; j < value->size(); j++) {
+		string ch = value->at(j);
 		if (ch == " ") {
 			gotOper(ch, 2);
 		} else if (ch == "*" || ch == "+") {
@@ -101,23 +104,18 @@ void Parser::scan() {
 		output->push_back(op_Stack.top());
 		op_Stack.pop();
 	}
-
-	//cout << output[0] << endl;
-	switch (type) {
-	case RE:
-		stringToNFA(output);
-		break;
-	default: //Insert the RD in the RDMap
+	cout<<endl;
+	if(isRD)
 	{
-		string rd = (*input)[0];
-		(*RDMap)[rd] = *output;
-		break;
+		vector<string>* temp = new vector<string>(output->begin() , output->end());
+		this->RDMap->operator [](name) = temp;
+		return NULL;
 	}
+	else{
+		NFA * nfa = stringToNFA(output);
+		return nfa;
 	}
-	//clear the input vector to be ready for use in the next RD or RE
-	input->clear();
-	NFA *x = stringToNFA(output);
-	x->debug();
+
 }
 
 bool Parser::isOperator(string token) {
@@ -139,57 +137,60 @@ NFA * Parser::createByBaseCase(string str) {
 }
 
 NFA* Parser::stringToNFA(vector<string> *in) {
+	stack <NFA*>* operand_stack = new stack<NFA*>();
 	for (unsigned int i = 0; i < in->size(); i++) {
 		string cur = in->at(i);
 		if (!isOperator(cur)) //This is an operand
 		{
-			map<string, vector<string> >::iterator it = RDMap->find(cur);
+			map<string, vector<string> *>::iterator it = RDMap->find(cur);
 			if (it == RDMap->end()) //This is a sequence or Range .....Base case
 			{
 				NFA *nfa = createByBaseCase(cur);
-				operand_stack.push(nfa);
+				operand_stack->push(nfa);
 			} else //This is a regular definition
 			{
-				NFA *nfa = stringToNFA(&it->second);
-				operand_stack.push(nfa);
+				NFA *nfa = stringToNFA(it->second);
+				operand_stack->push(nfa);
 			}
-		} else //This is an operator
+		}
+		else //This is an operator
 		{
 			int operation = -1;
 			if (cur == OR)
+			{
 				operation = NFA_JOIN_OR;
+			}
 			else if (cur == CONCATINATE)
 				operation = NFA_JOIN_CONCATENATE;
 			else if (cur == CLOSURE) {
-				NFA * result = operand_stack.top();
-				operand_stack.pop();
+				NFA * result = operand_stack->top();
+				operand_stack->pop();
 				result->apply_star_closure();
-				operand_stack.push(result);
+				operand_stack->push(result);
 			} else //Plus closure
 			{
-				NFA *result = operand_stack.top();
-				operand_stack.pop();
+				NFA *result = operand_stack->top();
+				operand_stack->pop();
 				result->apply_plus_closure();
-				operand_stack.push(result);
+				operand_stack->push(result);
 			}
 			//Binary operation
 			if (operation == NFA_JOIN_OR || operation == NFA_JOIN_CONCATENATE) {
 				//Get the first element
-				NFA * nfa1 = operand_stack.top();
-				operand_stack.pop();
+				NFA * nfa1 = operand_stack->top();
+				operand_stack->pop();
 				//Get the second element
-				NFA * nfa2 = operand_stack.top();
-				operand_stack.pop();
+				NFA * nfa2 = operand_stack->top();
+				operand_stack->pop();
 				//Join
 				nfa1->join(nfa2, operation);
-				operand_stack.push(nfa1);
+				operand_stack->push(nfa1);
 			}
 		}
 	}
-
-	assert(operand_stack.size() == 1);
-	NFA * result = operand_stack.top();
-	operand_stack.pop();
+	assert(operand_stack->size() == 1);
+	NFA * result = operand_stack->top();
+	operand_stack->pop();
 	return result;
 }
 
@@ -201,7 +202,7 @@ bool Parser::isSpecialChar(char c) {
 	return false;
 }
 
-void Parser::split(string line) {
+void Parser::parse(string line) {
 	//if we read a space
 	int st = 0;
 	int end = -1;
@@ -225,7 +226,7 @@ void Parser::split(string line) {
 				look_back = false;
 			}
 
-			//To handle concatination
+			//To handle concatenation
 			if (cur_char == '(' && isRHS) {
 				if (!isSpecialChar(lastChar) || lastChar == '+' || lastChar
 						== '*' || lastChar == ')')
@@ -287,9 +288,85 @@ void Parser::split(string line) {
 			lastIsSpace = false;
 		}
 	}
-	input = tokens;
-	scan();
+	//add each line to it's appropriate list
+	select_line_type(tokens);
 	delete(tokens);
+}
+
+void Parser::addTokens(){
+		//add keywords to the id's in this language
+		installKeywords();
+		//add the regular expression
+		string name;
+		for(unsigned int i = 0 ; i < RE_names->size() ; i++)
+		{
+			name = RE_names->operator [](i);
+			NFA * nfa = get_post_fix(name,RE_list->operator [](i) , false);
+			this->lan_tokens->push_back(name);	//Add the name to the table of tokens name
+			this->NFAS->push_back(nfa);			//Add the nfa to the table of nfa's
+			nfa->finalize_NFA(lan_tokens->size()-1);
+		}
+		NFA* combined_nfa = NFA::create_combined_NFA(this->NFAS);
+}
+
+
+void Parser::installKeywords(){
+	set<string>::iterator it;
+	//Iterate on the key words to construct it's NFA
+	 for ( it=keyWordMap->begin() ; it != keyWordMap->end(); it++ )
+	 {
+		 //Create param vector to pass the pattern of this keyword(its name)
+		 vector<string>* param = new vector<string>();
+		 param->push_back(*it);
+		 //get the nfa of the given keyword
+		 NFA* nfa = get_post_fix(*it,param,false);
+		 //add the nfa to the list of nfa's in this language
+		 this->NFAS->push_back(nfa);
+		 //add this token to lan_token vector
+		 this->lan_tokens->push_back(*it);
+		 //Finalizing nfa
+		 nfa->finalize_NFA(lan_tokens->size()-1);
+	 }
+}
+
+void Parser::select_line_type(vector<string> * tokens){
+	//check if the first element in the vector tokens is [ punctuation
+	if(tokens->operator [](0) == START_PUNCTUATION)
+	{
+		//Add the keywords to the punctuation vector
+		for(unsigned int i = 0 ; i < tokens->size() -1 ; i++)
+			punctuation->push_back(tokens->operator [](i));
+		return;
+	}
+	//Check if the first element in the vector tokens is{ key word
+	else if(tokens->operator [](0) == START_KEYWORD)
+	{
+		for(unsigned int i = 1 ; i < tokens->size() -1; i ++)
+		{
+			keyWordMap->insert(tokens->operator [](i));		//insert the keyword in the key word map
+		}
+	}
+	//Regular definition
+	else if(tokens->operator [](1) == "=")
+	{
+		string rd_name = tokens->operator [](0);
+		vector<string>* rd = new vector<string>();
+		for(unsigned int i = 2; i < tokens->size() ; i++)		//Copying the regular definition
+			rd->push_back(tokens->operator [](i));
+		get_post_fix(rd_name , rd , true);
+	}
+	//copying the regular expression
+	else if(tokens->operator [](1) == ":") //RE
+	{
+		string re_name = tokens->operator [](0);
+		vector<string>* re = new vector<string>();
+		for(unsigned int i = 2 ; i < tokens->size() ; i++)		//Copy the RE value
+		{
+			re->push_back(tokens->operator [](i));
+		}
+		RE_names->push_back(re_name);
+		RE_list->push_back(re);
+	}
 }
 
 int main() {
@@ -299,15 +376,24 @@ int main() {
 	if (in_file.is_open()) {
 		while (!in_file.eof()) {
 			getline(in_file, line);
-			cout << line << endl;
-			if (line == "")
-				break;
-			p.split(line);
+			if(line != "")
+			{
+				if (line == "")
+				{
+					break;
+				}
+				p.parse(line);
+			}
 		}
 		in_file.close();
-	} else
+		p.addTokens();
+		vector<NFA*> * names = p.getNFAS();
+		vector<NFA*>::iterator it;
+//		for(it = names->begin() ; it != names->end(); it++)
+//			(*it)->debug();
+	} else{
 		cout << "Unable to open file";
-	cout << "----------------------" << endl;
+	}
 
 	return 0;
 }
