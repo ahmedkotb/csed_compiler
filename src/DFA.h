@@ -18,9 +18,6 @@ public:
     DFA(const DFA& orig);
     virtual ~DFA();
 
-    // mov method which takes a state and input character and returns a vector of the transitions
-    vector<NFA_State *> * mov(NFA_State* current_state, INPUT_CHAR input_character);
-
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
     NFA_State* create_DFA_state(vector<NFA_State*>* states);
 
@@ -33,26 +30,28 @@ public:
     // takes a victor of integer and return an integer representing the result of hashing
     int hash(vector<int> ids);
 
-    // takes NFA and converts it to DFA
-    DFA* convert_NFA_to_DFA(NFA* nfa);
-
     //method used to number the states of the DFA
     //it gives each state a unique id starting from 0
     void number_states();
 
-       
+    //describes the entire DFA
+    void debug();
 
 private:
+    // mov method which takes a state and input character and returns a vector of the transitions
+    vector<NFA_State *> * mov(NFA_State* current_state, INPUT_CHAR input_character);
 
-    // return DFA
-    DFA* get_DFA(vector<NFA_State*>* states,NFA* nfa);
+    // takes NFA and converts it to DFA
+    void convert_NFA_to_DFA(NFA* nfa);
 
+    // helper method used in NFA to DFA conversion
+    void get_DFA(vector<NFA_State*>* states,NFA* nfa);
 
+    //the start state of the DFA
     NFA_State * start_state;
 
-    //hashmap returns a DFA state representing the given ids of NFA states
+    //map returns a DFA state representing the given id of NFA states
     map <int, NFA_State*> states_IDS;
-    map <int, NFA_State*>::iterator iterator;
 
 };
 

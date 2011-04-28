@@ -369,31 +369,31 @@ void Parser::select_line_type(vector<string> * tokens){
 	}
 }
 
-int main() {
-	string line;
-	Parser p;
-	ifstream in_file("input file.txt");
-	if (in_file.is_open()) {
-		while (!in_file.eof()) {
-			getline(in_file, line);
-			if(line != "")
-			{
-				if (line == "")
-				{
-					break;
-				}
-				p.parse(line);
-			}
-		}
-		in_file.close();
-		p.addTokens();
-		vector<NFA*> * names = p.getNFAS();
-		vector<NFA*>::iterator it;
-//		for(it = names->begin() ; it != names->end(); it++)
-//			(*it)->debug();
-	} else{
-		cout << "Unable to open file";
-	}
-
-	return 0;
-}
+//int main() {
+//	string line;
+//	Parser p;
+//	ifstream in_file("input file.txt");
+//	if (in_file.is_open()) {
+//		while (!in_file.eof()) {
+//			getline(in_file, line);
+//			if(line != "")
+//			{
+//				if (line == "")
+//				{
+//					break;
+//				}
+//				p.parse(line);
+//			}
+//		}
+//		in_file.close();
+//		p.addTokens();
+//		vector<NFA*> * names = p.getNFAS();
+//		vector<NFA*>::iterator it;
+////		for(it = names->begin() ; it != names->end(); it++)
+////			(*it)->debug();
+//	} else{
+//		cout << "Unable to open file";
+//	}
+//
+//	return 0;
+//}

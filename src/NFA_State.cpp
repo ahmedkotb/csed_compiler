@@ -167,70 +167,70 @@ NFA_State::~NFA_State() {
 	delete transitions;
 }
 
-int main() {
-	NFA_State *s;
-	NFA_State *v;
-	NFA_State *w;
-	NFA_State *q;
-
-	v = new NFA_State();
-	s = new NFA_State();
-	w = new NFA_State();
-	q = new NFA_State();
-
-	s->set_id(1);
-	v->set_id(2);
-	w->set_id(3);
-	q->set_id(4);
-
-	s->add_transition(EPSILON, v);
-	s->add_transition(EPSILON, q);
-	 s->add_transition('a', v);
-	 s->add_transition('a', v);
-	 s->add_transition('a', v);
-	 s->add_transition('b', q);
-	 s->add_transition('b', q);
-	 s->add_transition('b', q);
-	 s->add_transition('c', q);
-	 v->add_transition(EPSILON, s);
-	 //s->add_transition(EPSILON, s);
-	//s->show() ;
-	 v->add_transition(EPSILON, w);
-	//v->set_accepting_pattern("ssss");
-	//v->show();
-
-
-	//vector <INPUT_CHAR> *v2 = v->get_transitions_inputs();
-
-	vector<NFA_State*> *vec = s->get_transitions(EPSILON);
-
-	//cout << "returned" << endl;
-	//vector<INPUT_CHAR>::iterator iterate2;
-	vector<NFA_State*>::iterator iterate2;
-
-	/*for (iterate2 = v2->begin(); iterate2 != v2->end(); ++iterate2) {
-	 INPUT_CHAR c = (*iterate2);
-	 if(c == -1)
-	 cout << "EPSILON"<<" , ";
-	 else
-	 cout << char(c)<<" , ";
-	 }*/
-	cout <<"result"<<endl;
-	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
-		NFA_State *s = (*iterate2);
-		cout << s->get_description();
-		//cout << s->show()<<endl;
-	}
-
-	vec = s->get_transitions(EPSILON);
-	//cout <<"result2"<<endl;
-	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
-			NFA_State *s = (*iterate2);
-	//		cout << s->get_description();
-			//cout << s->show()<<endl;
-		}
-
-
-	return 0;
-}
+//int main() {
+//	NFA_State *s;
+//	NFA_State *v;
+//	NFA_State *w;
+//	NFA_State *q;
+//
+//	v = new NFA_State();
+//	s = new NFA_State();
+//	w = new NFA_State();
+//	q = new NFA_State();
+//
+//	s->set_id(1);
+//	v->set_id(2);
+//	w->set_id(3);
+//	q->set_id(4);
+//
+//	s->add_transition(EPSILON, v);
+//	s->add_transition(EPSILON, q);
+//	 s->add_transition('a', v);
+//	 s->add_transition('a', v);
+//	 s->add_transition('a', v);
+//	 s->add_transition('b', q);
+//	 s->add_transition('b', q);
+//	 s->add_transition('b', q);
+//	 s->add_transition('c', q);
+//	 v->add_transition(EPSILON, s);
+//	 //s->add_transition(EPSILON, s);
+//	//s->show() ;
+//	 v->add_transition(EPSILON, w);
+//	//v->set_accepting_pattern("ssss");
+//	//v->show();
+//
+//
+//	//vector <INPUT_CHAR> *v2 = v->get_transitions_inputs();
+//
+//	vector<NFA_State*> *vec = s->get_transitions(EPSILON);
+//
+//	//cout << "returned" << endl;
+//	//vector<INPUT_CHAR>::iterator iterate2;
+//	vector<NFA_State*>::iterator iterate2;
+//
+//	/*for (iterate2 = v2->begin(); iterate2 != v2->end(); ++iterate2) {
+//	 INPUT_CHAR c = (*iterate2);
+//	 if(c == -1)
+//	 cout << "EPSILON"<<" , ";
+//	 else
+//	 cout << char(c)<<" , ";
+//	 }*/
+//	cout <<"result"<<endl;
+//	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
+//		NFA_State *s = (*iterate2);
+//		cout << s->get_description();
+//		//cout << s->show()<<endl;
+//	}
+//
+//	vec = s->get_transitions(EPSILON);
+//	//cout <<"result2"<<endl;
+//	for (iterate2 = vec->begin(); iterate2 != vec->end(); ++iterate2) {
+//			NFA_State *s = (*iterate2);
+//	//		cout << s->get_description();
+//			//cout << s->show()<<endl;
+//		}
+//
+//
+//	return 0;
+//}
 

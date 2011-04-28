@@ -43,10 +43,6 @@ private:
 	//to the beginning accepting pattern of each state
 	void concatenate_pattern(NFA*,string);
 
-	//private method used to number the states of the NFA
-	//it gives each state a unique id starting from 0
-	void number_states();
-
 	//Empty NFA Constructor is private only
 	NFA();
 
@@ -76,10 +72,12 @@ public:
 	//prints the entire NFA
 	void debug();
 
-        // return the start state of the NFA
-        NFA_State* get_start_state();
+    // return the start state of the NFA
+    NFA_State* get_start_state();
 
-        
+	//used to number the states of the NFA
+	//it gives each state a unique id starting from 0
+	void number_states();
 
 	//static method used to create combined NFA of group of NFA(s)
 	static NFA* create_combined_NFA(vector<NFA*> *);
