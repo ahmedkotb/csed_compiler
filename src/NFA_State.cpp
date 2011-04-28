@@ -25,6 +25,14 @@ NFA_State::NFA_State() {
 	transitions = new multimap<INPUT_CHAR, NFA_State*> ();
 }
 
+bool NFA_State::is_accepting_state(){
+	return is_accepting;
+}
+
+int NFA_State::get_token_id(){
+	return token_id;
+}
+
 void NFA_State::add_transition(INPUT_CHAR input, NFA_State* state) {
 
 	//remove duplicates

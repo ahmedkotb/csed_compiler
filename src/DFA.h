@@ -24,12 +24,6 @@ public:
     // return DFA start state
     NFA_State* get_start_state();
 
-    // return the IDs of the given NFA states
-    vector<int> get_IDS(vector<NFA_State*>* states);
-
-    // takes a victor of integer and return an integer representing the result of hashing
-    int hash(vector<int> *ids);
-
     //method used to number the states of the DFA
     //it gives each state a unique id starting from 0
     void number_states();
@@ -67,6 +61,13 @@ private:
 
     //map returns a DFA state representing the given id of NFA states
     map <int, NFA_State*> states_IDS;
+
+    // return the IDs of the given NFA states
+    vector<int> * get_IDS(vector<NFA_State*>* states);
+
+    // takes a victor of integer and return an integer representing the result of hashing
+    int hash(vector<int> *ids);
+
 
 };
 

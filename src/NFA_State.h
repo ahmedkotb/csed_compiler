@@ -58,6 +58,8 @@ public:
 	void set_id(int);
 	int get_id();
 	void set_token_id(int);
+	bool is_accepting_state();
+	int get_token_id();
 	void set_accepting_pattern(string);
 	string get_accepting_pattern();
 	vector<INPUT_CHAR>* get_transitions_inputs();

@@ -43,12 +43,11 @@ NFA_State* DFA::get_start_state() {
     return this->start_state;
 }
 
-vector<int> DFA::get_IDS(vector<NFA_State*>* states) {
+vector<int> * DFA::get_IDS(vector<NFA_State*>* states) {
 
-    vector<int> ids;
+    vector<int> * ids = new vector<int>();
     for (unsigned int i = 0; i < states->size(); i++) {
-
-        ids.push_back(states->at(i)->get_id());
+        ids->push_back(states->at(i)->get_id());
     }
 
     return ids;
@@ -65,13 +64,15 @@ int DFA::hash(vector<int>* ids) {
 
 NFA_State* DFA::create_DFA_state(vector<NFA_State*>* states) {
     NFA_State* state = new NFA_State();
-    
-    // STEPS
-    // 1- (NOT DONE) if any of the NFA states is accepting , set DFA state as accepting
-    // 2- (NOT DONE) set the accepting pattern of the new DFA state with the highest
-    //     priority of the patterns of the NFA states
-
-
+    //set accepting token of new DFA state to the accepting token of highest priority
+    int min = 1 << 30;
+    for (unsigned int i = 0;i<states->size();i++){
+    	if (states->at(i)->is_accepting_state() && states->at(i)->get_token_id() < min ){
+    		min = states->at(i)->get_token_id();
+    	}
+    }
+    if (min != 1<<30)
+    	state->set_token_id(min);
     return state;
 }
 
@@ -118,16 +119,16 @@ void DFA::number_states() {
 void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
 
     // vector holding the transitioned states for each input
-    vector<vector<NFA_State*>*>* row_new_states = new vector<vector<NFA_State*>*>;
+    vector<vector<NFA_State*>*>* row_new_states = new vector<vector<NFA_State*>*>();
 
     // vector holding the ids of the states
-    vector<int> ids = this->get_IDS(states);
-    int hash = this->hash(&ids);
+    vector<int>* ids = this->get_IDS(states);
+    int hash = this->hash(ids);
+    delete ids;
     map <int, NFA_State*>::iterator iterator = states_IDS.find(hash);
 
     NFA_State * current;
     if (iterator == states_IDS.end()) {
-
         current = create_DFA_state(states);
         ++this->states_count;
         states_IDS.insert(pair<int, NFA_State*>(hash, current));
@@ -165,13 +166,13 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
 
         // new states appeared in the table and needs new row
         if (cell->size() != 0) {
-            vector<int> ids = this->get_IDS(cell);
-            int hash = this->hash(&ids);
+            vector<int> *ids = this->get_IDS(cell);
+            int hash = this->hash(ids);
             iterator = states_IDS.find(hash);
 
             NFA_State* going;
             if (iterator == states_IDS.end()) {
-                going = create_DFA_state(states);
+                going = create_DFA_state(cell);
                 ++this->states_count;
                 // add state to current row
                 row_new_states->push_back(cell);
@@ -180,6 +181,7 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
                 going = iterator->second;
             }
             current->add_transition(*it, going);
+            delete ids;
         }
     }
 
