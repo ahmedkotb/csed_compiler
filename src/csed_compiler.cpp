@@ -44,8 +44,19 @@ int main() {
 	//Testing NFA to DFA conversion
 	NFA nfa4('x', 'z');
 	DFA* dfa = new DFA(&nfa4);
-	dfa->number_states();
 	dfa->debug();
-
+	cout << "===================================================" << endl;
+	//Testing NFA to DFA conversion
+	// Example in compilers book page 155
+	// (a|b)*abb
+	// the dfa is found at page 156
+	NFA nfa5('a');
+	nfa5.join(new NFA('b'),NFA_JOIN_OR);
+	nfa5.apply_star_closure();
+	nfa5.join(new NFA("abb"),NFA_JOIN_CONCATENATE);
+	nfa5.finalize_NFA(0);
+	//nfa5.debug();
+	DFA * result = new DFA(&nfa5);
+	result->debug();
 	return 0;
 }

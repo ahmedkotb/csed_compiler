@@ -97,15 +97,15 @@ void NFA::apply_plus_closure() {
     new_start_state->add_transition(EPSILON, this->start_state);
     this->final_state->add_transition(EPSILON, new_final_state);
 
-    //the repeating edge (that allows for more than one occurence of pattern)
+    //the repeating edge (that allows for more than one occurrence of pattern)
     this->final_state->add_transition(EPSILON, new_start_state);
 
-    //modifty starting and final state of this nfa
+    //modify accepting pattern of final state
+    new_final_state->set_accepting_pattern("( " + this->final_state->get_accepting_pattern() + " )+");
+
+    //Modify starting and final state of this nfa
     this->start_state = new_start_state;
     this->final_state = new_final_state;
-
-    //modify accepting pattern of final state
-    this->final_state->set_accepting_pattern("( " + this->final_state->get_accepting_pattern() + " )+");
 
     //add EPSILON to alphabet
     this->alphabet->insert(EPSILON);
@@ -114,7 +114,7 @@ void NFA::apply_plus_closure() {
 
 void NFA::apply_star_closure() {
     this->apply_plus_closure();
-    //add the zero edge (that enables zero occurence of pattern)
+    //add the zero edge (that enables zero occurrence of pattern)
     this->start_state->add_transition(EPSILON, this->final_state);
     //replace the + of the plus closure with *
     unsigned int index = this->final_state->get_accepting_pattern().rfind('+');
