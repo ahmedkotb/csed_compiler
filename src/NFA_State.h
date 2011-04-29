@@ -28,10 +28,10 @@ private:
 			NFA_State*>::iterator> return_it;
 
 	//helper method to get_transition in case of epsilon input
-	vector<NFA_State*>* epislon_closure(NFA_State*);
+	set<NFA_State*>* epislon_closure(NFA_State*);
 
 	//get transition helper with specified input
-	vector<NFA_State *>* get_transitions_helper(INPUT_CHAR);
+	set<NFA_State *>* get_transitions_helper(INPUT_CHAR);
 
 	//remove duplicates helper function
 	inline void remove_duplicates(std::vector<INPUT_CHAR> *vec) {
@@ -46,7 +46,7 @@ public:
 	void add_transition(INPUT_CHAR, NFA_State *);
 
 	//get transition with specified input
-	vector<NFA_State *>* get_transitions(INPUT_CHAR);
+	set<NFA_State *>* get_transitions(INPUT_CHAR);
 
 	//returns state information
 	string get_description();

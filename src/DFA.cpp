@@ -35,7 +35,7 @@ DFA::~DFA() {
 	delete alphabet;
 }
 
-vector<NFA_State *> * DFA::mov(NFA_State* current_state, INPUT_CHAR input_character) {
+set<NFA_State *> * DFA::mov(NFA_State* current_state, INPUT_CHAR input_character) {
     return current_state->get_transitions(input_character);
 }
 
@@ -43,17 +43,18 @@ NFA_State* DFA::get_start_state() {
     return this->start_state;
 }
 
-vector<int> * DFA::get_IDS(vector<NFA_State*>* states) {
-
+vector<int> * DFA::get_IDS(set<NFA_State*>* states) {
     vector<int> * ids = new vector<int>();
-    for (unsigned int i = 0; i < states->size(); i++) {
-        ids->push_back(states->at(i)->get_id());
-    }
-
+    set<NFA_State *>::iterator it;
+	for (it = states->begin() ;it != states->end() ;++it){
+		ids->push_back((*it)->get_id());
+	}
     return ids;
 }
 
 int DFA::hash(vector<int>* ids) {
+	//sort the vector to obtain the same hash
+	sort(ids->begin(),ids->end());
     int hash = 0;
     for (unsigned int i = 0; i < ids->size(); i++) {
         hash += ids->at(i);
@@ -62,13 +63,14 @@ int DFA::hash(vector<int>* ids) {
     return hash;
 }
 
-NFA_State* DFA::create_DFA_state(vector<NFA_State*>* states) {
+NFA_State* DFA::create_DFA_state(set<NFA_State*>* states) {
     NFA_State* state = new NFA_State();
+    set<NFA_State*>::iterator it;
     //set accepting token of new DFA state to the accepting token of highest priority
     int min = 1 << 30;
-    for (unsigned int i = 0;i<states->size();i++){
-    	if (states->at(i)->is_accepting_state() && states->at(i)->get_token_id() < min ){
-    		min = states->at(i)->get_token_id();
+    for (it=states->begin() ; it != states->end() ; ++it){
+    	if ((*it)->is_accepting_state() && (*it)->get_token_id() < min ){
+    		min = (*it)->get_token_id();
     	}
     }
     if (min != 1<<30)
@@ -77,7 +79,7 @@ NFA_State* DFA::create_DFA_state(vector<NFA_State*>* states) {
 }
 
 void DFA::convert_NFA_to_DFA(NFA* nfa) {
-	vector <NFA_State *> * start_states = nfa->get_start_state()->get_transitions(EPSILON);
+	set <NFA_State *> * start_states = nfa->get_start_state()->get_transitions(EPSILON);
     assert (nfa->get_states_count()!=0);
     get_DFA(start_states, nfa);
     delete start_states;
@@ -93,7 +95,8 @@ void DFA::number_states() {
 
     NFA_State * current_state;
     vector<INPUT_CHAR>* inputs;
-    vector<NFA_State *>* states;
+    set<NFA_State *>* states;
+    set<NFA_State *>::iterator it;
     int counter = 0;
     while (!queue.empty()) {
         current_state = queue.front();
@@ -103,12 +106,14 @@ void DFA::number_states() {
         inputs = current_state->get_transitions_inputs();
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
-            for (unsigned int j = 0; j < states->size(); ++j) {
-                if (visited.find(states->at(j)) != visited.end()) continue;
-                queue.push(states->at(j));
-                visited.insert(states->at(j));
-            }
-            //delete the states vector that is created by the get_transitions method
+            for (it = states->begin() ;it != states->end();++it){
+    			if (visited.find(*it) == visited.end()){
+    				//a new state was found
+    				visited.insert(*it);
+    				queue.push(*it);
+    			}
+    		}
+            //delete the states set that is created by the get_transitions method
             delete states;
         }
         //delete the inputs vector that is created by get_transitions_inputs() method
@@ -116,10 +121,10 @@ void DFA::number_states() {
     }
 }
 
-void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
+void DFA::get_DFA(set<NFA_State*>* states, NFA* nfa) {
 
     // vector holding the transitioned states for each input
-    vector<vector<NFA_State*>*>* row_new_states = new vector<vector<NFA_State*>*>();
+    vector<set<NFA_State*>*>* row_new_states = new vector<set<NFA_State*>*>();
 
     // vector holding the ids of the states
     vector<int>* ids = this->get_IDS(states);
@@ -147,20 +152,22 @@ void DFA::get_DFA(vector<NFA_State*>* states, NFA* nfa) {
     set<INPUT_CHAR>::iterator it;
 
     for (it = alphabet->begin(); it != alphabet->end(); it++) {
-        // vector representing group of NFA states (DFA State)
-        vector<NFA_State*>* cell = new vector<NFA_State*>;
+        // set representing group of NFA states (DFA State)
+        set<NFA_State*>* cell = new set<NFA_State*>;
 
         if ((char) *it == EPSILON)// empty transition
             continue;
-        for (unsigned int i = 0; i < states->size(); i++) {
+
+        for (set<NFA_State*>::iterator si = states->begin() ; si != states->end() ; ++si){
             // states resulting from the mov function
-            vector<NFA_State*>* mov_states = this->mov(states->at(i), *it);
-            for (unsigned int k = 0; k < mov_states->size(); k++) {
-                // states resulting from the epsilon closure
-                vector<NFA_State*>* epsilon_states = mov_states->at(k)->get_transitions(EPSILON);
-                for (unsigned int l = 0; l < epsilon_states->size(); l++) {
-                    cell->push_back(epsilon_states->at(l));
-                }
+            set<NFA_State*>* mov_states = this->mov(*(si), *it);
+            //TODO : this step can be optimized by pre-calculation of epsilon closure of all states
+            for (set<NFA_State*>::iterator sj = mov_states->begin() ; sj != mov_states->end() ; ++sj){
+            	// states resulting from the epsilon closure
+            	set<NFA_State*>* epsilon_states = (*sj)->get_transitions(EPSILON);
+            	for (set<NFA_State*>::iterator sk = epsilon_states->begin() ; sk != epsilon_states->end() ; ++sk){
+            		cell->insert(*(sk));
+            	}
             }
         }
 
@@ -224,7 +231,7 @@ void DFA::debug() {
 
     NFA_State * current_state;
     vector<INPUT_CHAR>* inputs;
-    vector<NFA_State *>* states;
+    set<NFA_State *>* states;
 
     while (!queue.empty()) {
         current_state = queue.front();
@@ -234,11 +241,13 @@ void DFA::debug() {
         inputs = current_state->get_transitions_inputs();
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
-            for (unsigned int j = 0; j < states->size(); ++j) {
-                if (visited.find(states->at(j)) != visited.end()) continue;
-                queue.push(states->at(j));
-                visited.insert(states->at(j));
-            }
+            for (set<NFA_State *>::iterator it = states->begin() ;it != states->end();++it){
+    			if (visited.find(*it) == visited.end()){
+    				//a new state was found
+    				visited.insert(*it);
+    				queue.push(*it);
+    			}
+    		}
             //delete the states vector that is created by the get_transitions method
             delete states;
         }

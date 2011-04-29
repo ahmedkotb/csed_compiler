@@ -7,7 +7,6 @@
 
 #include "NFA_State.h"
 
-map<int, bool> visited;
 
 NFA_State::NFA_State() {
 	//the id will be used as an identifier in the conversion to DFA state
@@ -44,33 +43,32 @@ void NFA_State::add_transition(INPUT_CHAR input, NFA_State* state) {
 
 }
 
-vector<NFA_State *>* NFA_State::get_transitions(INPUT_CHAR input) {
+set<NFA_State *>* NFA_State::get_transitions(INPUT_CHAR input) {
 
 	//check epsilon input
 	if (input == EPSILON) {
-		visited.clear();
 		return epislon_closure(this);
 	} else
 		return get_transitions_helper(input); //normal case
 }
 
-vector<NFA_State *>* NFA_State::get_transitions_helper(INPUT_CHAR input) {
+set<NFA_State *>* NFA_State::get_transitions_helper(INPUT_CHAR input) {
 
-	vector<NFA_State *> *result;
-	result = new vector<NFA_State *> ();
+	set<NFA_State *> *result = new set<NFA_State *> ();
 	return_it = transitions->equal_range(input);
 	//iterate over the input range
 	for (iterate = return_it.first; iterate != return_it.second; ++iterate) {
 		NFA_State *s = (*iterate).second;
-		result->push_back(s);
+		result->insert(s);
 	}
 	return result;
 }
 
-vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
+set<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 	//visited states
-	set<NFA_State *> visited;
-	visited.insert(s);
+	set<NFA_State *>* visited = new set<NFA_State *>();
+	set<NFA_State *>::iterator it;
+	visited->insert(s);
 	//bfs queue
 	queue<NFA_State*> queue;
 	queue.push(s);
@@ -81,22 +79,17 @@ vector<NFA_State *>* NFA_State::epislon_closure(NFA_State* s) {
 		current_state = queue.front();
 		queue.pop();
 		//Neighbors
-		vector <NFA_State *> * transitions = current_state->get_transitions_helper(EPSILON);
-		for(unsigned int i = 0; i<transitions->size();i++){
-			if (visited.find(transitions->at(i)) == visited.end()){
+		set <NFA_State *> * transitions = current_state->get_transitions_helper(EPSILON);
+		for (it = transitions->begin() ;it != transitions->end();++it){
+			if (visited->find(*it) == visited->end()){
 				//a new state was found
-				visited.insert(transitions->at(i));
-				queue.push(transitions->at(i));
+				visited->insert(*it);
+				queue.push(*it);
 			}
 		}
 		delete transitions;
 	}
-	//Why not return set instead of having to copy the set into a vector !!!
-	vector <NFA_State *> * result = new vector<NFA_State *>();
-    set<NFA_State *>::iterator it;
-    for (it = visited.begin(); it != visited.end(); it++)
-        result->push_back(*(it));
-    return result;
+    return visited;
 }
 
 void NFA_State::set_accepting_pattern(string accepting_pattern) {

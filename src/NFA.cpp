@@ -155,7 +155,7 @@ void NFA::concatenate_pattern(NFA * nfa, string pattern) {
     queue.push(nfa->start_state);
     NFA_State * current_state;
     vector<INPUT_CHAR>* inputs;
-    vector<NFA_State *>* states;
+    set<NFA_State *>* states;
     while (!queue.empty()) {
         current_state = queue.front();
         queue.pop();
@@ -166,11 +166,13 @@ void NFA::concatenate_pattern(NFA * nfa, string pattern) {
         inputs = current_state->get_transitions_inputs();
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
-            for (unsigned int j = 0; j < states->size(); ++j) {
-                if (visited.find(states->at(j)) != visited.end()) continue;
-                queue.push(states->at(j));
-                visited.insert(states->at(j));
-            }
+            for (set<NFA_State *>::iterator it = states->begin() ;it != states->end();++it){
+       			if (visited.find(*it) == visited.end()){
+       				//a new state was found
+       				visited.insert(*it);
+       				queue.push(*it);
+       			}
+       		}
             //delete the states vector that is created by the get_transitions method
             delete states;
         }
@@ -189,7 +191,7 @@ void NFA::number_states() {
 
     NFA_State * current_state;
     vector<INPUT_CHAR>* inputs;
-    vector<NFA_State *>* states;
+    set<NFA_State *>* states;
     int counter = 0;
     while (!queue.empty()) {
         current_state = queue.front();
@@ -199,11 +201,13 @@ void NFA::number_states() {
         inputs = current_state->get_transitions_inputs();
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
-            for (unsigned int j = 0; j < states->size(); ++j) {
-                if (visited.find(states->at(j)) != visited.end()) continue;
-                queue.push(states->at(j));
-                visited.insert(states->at(j));
-            }
+            for (set<NFA_State *>::iterator it = states->begin() ;it != states->end();++it){
+       			if (visited.find(*it) == visited.end()){
+       				//a new state was found
+       				visited.insert(*it);
+       				queue.push(*it);
+       			}
+       		}
             //delete the states vector that is created by the get_transitions method
             delete states;
         }
@@ -236,7 +240,7 @@ void NFA::debug() {
 
     NFA_State * current_state;
     vector<INPUT_CHAR>* inputs;
-    vector<NFA_State *>* states;
+    set<NFA_State *>* states;
 
     while (!queue.empty()) {
         current_state = queue.front();
@@ -246,11 +250,13 @@ void NFA::debug() {
         inputs = current_state->get_transitions_inputs();
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
-            for (unsigned int j = 0; j < states->size(); ++j) {
-                if (visited.find(states->at(j)) != visited.end()) continue;
-                queue.push(states->at(j));
-                visited.insert(states->at(j));
-            }
+            for (set<NFA_State *>::iterator it = states->begin() ;it != states->end();++it){
+       			if (visited.find(*it) == visited.end()){
+       				//a new state was found
+       				visited.insert(*it);
+       				queue.push(*it);
+       			}
+       		}
             //delete the states vector that is created by the get_transitions method
             delete states;
         }
