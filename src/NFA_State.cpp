@@ -35,15 +35,11 @@ int NFA_State::get_token_id(){
 
 void NFA_State::add_transition(INPUT_CHAR input, NFA_State* state) {
 
-	//remove duplicates
-	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
-		INPUT_CHAR in = iterate->first;
-		NFA_State *s = iterate->second;
-		if (in == input && s == state) {
-			transitions->erase(iterate);
-			return; //no need to insert the duplicated element
-		}
-	}
+	multimap<INPUT_CHAR, NFA_State*>::iterator it = transitions->find(input);
+	//transition already found
+	if (it != transitions->end() && it->second == state)
+		return;
+
 	transitions->insert(pair<INPUT_CHAR, NFA_State*> (input, state));
 
 }
@@ -130,7 +126,7 @@ vector<INPUT_CHAR>* NFA_State::get_transitions_inputs() {
 	for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
 		vec->push_back(iterate->first);
 	}
-	removeDuplicates2(vec);
+	remove_duplicates(vec);
 	return vec;
 }
 

@@ -33,12 +33,8 @@ private:
 	//get transition helper with specified input
 	vector<NFA_State *>* get_transitions_helper(INPUT_CHAR);
 
-	//remove duplicates
-	void removeDuplicates(std::vector<NFA_State*> *vec) {
-		std::sort(vec->begin(), vec->end());
-		vec->erase(std::unique(vec->begin(), vec->end()), vec->end());
-	}
-	void removeDuplicates2(std::vector<INPUT_CHAR> *vec) {
+	//remove duplicates helper function
+	inline void remove_duplicates(std::vector<INPUT_CHAR> *vec) {
 		std::sort(vec->begin(), vec->end());
 		vec->erase(std::unique(vec->begin(), vec->end()), vec->end());
 	}
