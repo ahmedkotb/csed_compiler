@@ -17,17 +17,8 @@ void do_tests();
 int main() {
 	cout << "The Best Compiler isA" << endl;
 	do_tests();
-
-	//Testing the parser
-	Parser* p = new Parser();
-	Parsing_output* combined_nfa = p->parse("input file.txt");
-	vector<string>::iterator it;
-	vector<string>* tokens = combined_nfa->get_lan_tokens();
-	for(it = tokens->begin(); it != tokens->end() ; it++)
-		cout << (*it)<<endl;
-		return 0;
+	return 0;
 }
-
 void nfa_dfa_tests(){
 	cout << "===================================================" << endl;
 	//Testing Simple NFA operations (ORing and concatenation)
@@ -119,7 +110,24 @@ void nfa_dfa_tests(){
 	//test_Combined_DFA->debug();
 	assert(test_Combined_DFA->get_states_count() == 3);
 }
-
+void parsing_tests(){
+	//Testing the parser
+	Parser* p = new Parser();
+	//ON WINDOWS
+	//Parsing_output* combined_nfa = p->parse("tests\t0");
+	//ON Linux
+	Parsing_output* output = p->parse("./tests/t0");
+	vector<string>::iterator it;
+	vector<string>* tokens = output->get_lan_tokens();
+	cout << "Tokens :" << endl;
+	for(it = tokens->begin(); it != tokens->end() ; it++)
+		cout << (*it)<<endl;
+	NFA* nfa= output->get_combinedNFA();
+	DFA* dfa = new DFA(nfa);
+	//dfa->minimize();
+	dfa->debug();
+}
 void do_tests(){
 	nfa_dfa_tests();
+	parsing_tests();
 }
