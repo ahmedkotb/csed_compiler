@@ -1,0 +1,6 @@
+{ if then }
+relop : < | <= | = | <> | > | >=
+id : letter ( letter | digit )*
+num : digit digit*
+letter = a-z
+digit = 0-9

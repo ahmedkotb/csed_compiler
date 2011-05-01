@@ -19,7 +19,7 @@ int main() {
 	return 0;
 }
 
-void do_tests(){
+void nfa_dfa_tests(){
 	cout << "===================================================" << endl;
 	//Testing Simple NFA operations (ORing and concatenation)
 	NFA nfa1('x', 'z');
@@ -109,4 +109,8 @@ void do_tests(){
 	DFA * test_Combined_DFA = new DFA(combined_NFA);
 	//test_Combined_DFA->debug();
 	assert(test_Combined_DFA->get_states_count() == 3);
+}
+
+void do_tests(){
+	nfa_dfa_tests();
 }
