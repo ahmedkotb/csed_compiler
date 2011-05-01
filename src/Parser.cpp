@@ -44,6 +44,38 @@ vector<string>* Parser::getTokens(){
 	return this->lan_tokens;
 }
 
+Parsing_output* Parser::parse(string file_name){
+	string line;
+	ifstream in_file(file_name.c_str());
+	if (in_file.is_open())
+	{
+		while (!in_file.eof())
+		{
+			getline(in_file, line);
+			if(line != "")
+			{
+				if (line == "")
+				{
+					break;
+				}
+				split(line);
+			}
+		}
+		in_file.close();
+		NFA* combined = this->addTokens();
+		Parsing_output* c = new Parsing_output(combined,this->lan_tokens);
+		return c;
+	}
+
+	else
+	{
+		cout << "Unable to open file";
+		return NULL;
+	}
+
+
+
+}
 void Parser::gotOper(string opThis, int prec1) {
 	while (!op_Stack.empty()) {
 		string opTop = op_Stack.top();
@@ -104,7 +136,6 @@ NFA* Parser::get_post_fix(string name , vector<string>* value,bool isRD) {
 		output->push_back(op_Stack.top());
 		op_Stack.pop();
 	}
-	cout<<endl;
 	if(isRD)
 	{
 		vector<string>* temp = new vector<string>(output->begin() , output->end());
@@ -162,6 +193,7 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 			}
 			else if (cur == CONCATINATE)
 				operation = NFA_JOIN_CONCATENATE;
+			//Kleene Closure
 			else if (cur == CLOSURE) {
 				NFA * result = operand_stack->top();
 				operand_stack->pop();
@@ -183,8 +215,8 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 				NFA * nfa2 = operand_stack->top();
 				operand_stack->pop();
 				//Join
-				nfa1->join(nfa2, operation);
-				operand_stack->push(nfa1);
+				nfa2->join(nfa1, operation);
+				operand_stack->push(nfa2);
 			}
 		}
 	}
@@ -202,7 +234,7 @@ bool Parser::isSpecialChar(char c) {
 	return false;
 }
 
-void Parser::parse(string line) {
+void Parser::split(string line) {
 	//if we read a space
 	int st = 0;
 	int end = -1;
@@ -293,9 +325,11 @@ void Parser::parse(string line) {
 	delete(tokens);
 }
 
-void Parser::addTokens(){
+NFA* Parser::addTokens(){
 		//add keywords to the id's in this language
-		installKeywords();
+		install_Keywords();
+		//add the punctuation to the id's in the langauge
+		install_punctuation();
 		//add the regular expression
 		string name;
 		for(unsigned int i = 0 ; i < RE_names->size() ; i++)
@@ -307,10 +341,11 @@ void Parser::addTokens(){
 			nfa->finalize_NFA(lan_tokens->size()-1);
 		}
 		NFA* combined_nfa = NFA::create_combined_NFA(this->NFAS);
+		return combined_nfa;
 }
 
 
-void Parser::installKeywords(){
+void Parser::install_Keywords(){
 	set<string>::iterator it;
 	//Iterate on the key words to construct it's NFA
 	 for ( it=keyWordMap->begin() ; it != keyWordMap->end(); it++ )
@@ -329,12 +364,27 @@ void Parser::installKeywords(){
 	 }
 }
 
+void Parser::install_punctuation(){
+	 vector<string>::iterator it;
+	 //Iterate on the punctuation to constructs it's NAF
+	 for(it = punctuation->begin() ; it != punctuation->end(); it++){
+		 //create nfa for each punctuation
+		 NFA* nfa = createByBaseCase((*it));
+		 //Add the created NFA to the NFAs
+		 this->NFAS->push_back(nfa);
+		 //Add the token to the language tokens
+		 this->lan_tokens->push_back(*it);
+		 //Finalize the NFA with its id
+		 nfa->finalize_NFA(lan_tokens->size()-1);
+	 }
+}
+
 void Parser::select_line_type(vector<string> * tokens){
 	//check if the first element in the vector tokens is [ punctuation
 	if(tokens->operator [](0) == START_PUNCTUATION)
 	{
-		//Add the keywords to the punctuation vector
-		for(unsigned int i = 0 ; i < tokens->size() -1 ; i++)
+		//Add the punctuation to the punctuation vector
+		for(unsigned int i = 1 ; i < tokens->size() -1 ; i++)
 			punctuation->push_back(tokens->operator [](i));
 		return;
 	}
@@ -368,32 +418,3 @@ void Parser::select_line_type(vector<string> * tokens){
 		RE_list->push_back(re);
 	}
 }
-
-//int main() {
-//	string line;
-//	Parser p;
-//	ifstream in_file("input file.txt");
-//	if (in_file.is_open()) {
-//		while (!in_file.eof()) {
-//			getline(in_file, line);
-//			if(line != "")
-//			{
-//				if (line == "")
-//				{
-//					break;
-//				}
-//				p.parse(line);
-//			}
-//		}
-//		in_file.close();
-//		p.addTokens();
-//		vector<NFA*> * names = p.getNFAS();
-//		vector<NFA*>::iterator it;
-////		for(it = names->begin() ; it != names->end(); it++)
-////			(*it)->debug();
-//	} else{
-//		cout << "Unable to open file";
-//	}
-//
-//	return 0;
-//}

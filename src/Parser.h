@@ -16,6 +16,7 @@
 #include <string>
 #include "NFA.h"
 #include <map>
+#include "Parsing_output.h"
 //Constants
 #define RE 0
 #define RD 1
@@ -33,16 +34,13 @@ using namespace std;
 
 class Parser {
 public:
-    stack <string> op_Stack;
-    vector <string>*output;
-    vector <string>* input;
     Parser();
     virtual ~Parser();
-    void parse(string line);
-    void addTokens();
-	vector<NFA*>* getNFAS();
-	vector<string>* getTokens();
+    Parsing_output* parse(string file_name);
 private:
+	stack <string> op_Stack;
+	vector <string>*output;
+	vector <string>* input;
     set<string >* keyWordMap;
     vector <string>* punctuation;	//The punctuation in the system
     vector<string>* RE_names;
@@ -51,7 +49,8 @@ private:
     vector<string>* lan_tokens;
     vector<NFA*>* NFAS;
     //Methods
-    void installKeywords();
+    void install_Keywords();
+    void install_punctuation();
     void select_line_type(vector <string>* tokens);
     void addRegularDefinition();
     void gotOper(string opThis, int prec1);
@@ -61,6 +60,10 @@ private:
 	NFA *createByBaseCase(string str);
 	NFA *stringToNFA(vector <string> *in);
 	bool isSpecialChar(char c);
+	void split(string line);
+	NFA* addTokens();
+	vector<NFA*>* getNFAS();
+	vector<string>* getTokens();
 };
 
 #endif	/* TREE_BUILDER_H */

@@ -9,6 +9,7 @@
 #include <iostream>
 #include "NFA.h"
 #include "DFA.h"
+#include "Parser.h"
 using namespace std;
 
 void do_tests();
@@ -16,7 +17,15 @@ void do_tests();
 int main() {
 	cout << "The Best Compiler isA" << endl;
 	do_tests();
-	return 0;
+
+	//Testing the parser
+	Parser* p = new Parser();
+	Parsing_output* combined_nfa = p->parse("input file.txt");
+	vector<string>::iterator it;
+	vector<string>* tokens = combined_nfa->get_lan_tokens();
+	for(it = tokens->begin(); it != tokens->end() ; it++)
+		cout << (*it)<<endl;
+		return 0;
 }
 
 void nfa_dfa_tests(){
