@@ -114,9 +114,9 @@ void parsing_tests(){
 	//Testing the parser
 	Parser* p = new Parser();
 	//ON WINDOWS
-	//Parsing_output* combined_nfa = p->parse("tests\t0");
+	//Parsing_output* combined_nfa = p->parse("tests\t1");
 	//ON Linux
-	Parsing_output* output = p->parse("./tests/t0");
+	Parsing_output* output = p->parse("./tests/t1");
 	vector<string>::iterator it;
 	vector<string>* tokens = output->get_lan_tokens();
 	cout << "Tokens :" << endl;
@@ -124,7 +124,7 @@ void parsing_tests(){
 		cout << (*it)<<endl;
 	NFA* nfa= output->get_combinedNFA();
 	DFA* dfa = new DFA(nfa);
-	//dfa->minimize();
+	dfa->minimize();
 	dfa->debug();
 }
 void do_tests(){

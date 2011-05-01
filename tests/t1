@@ -1,0 +1,4 @@
+{ if then }
+id : letter ( letter | digit )*
+letter = a-z
+digit = 0-9
