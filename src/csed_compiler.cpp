@@ -54,7 +54,7 @@ void do_tests(){
 	assert(dfa->get_states_count() == 2);
 	//Result == SUCCESS
 	cout << "===================================================" << endl;
-	//Testing NFA to DFA conversion
+	//Testing NFA to DFA conversion AND MINIMIZATION
 	// Example in compilers book page 155
 	// (a|b)*abb
 	// the dfa is found at page 156
@@ -65,9 +65,12 @@ void do_tests(){
 	nfa5.finalize_NFA(0);
 	//nfa5.debug();
 	DFA * result = new DFA(&nfa5);
-	//result->debug();
 	assert(result->get_states_count() == 5);
-	//Result == SUCCESS  [5 states as in the book]
+	//Result == SUCCESS  [5 states as in the book page 156]
+	result->minimize();
+	assert(result->get_states_count() == 4);
+	//result->debug();
+	//Result == SUCCESS  [4 states as in the book page 184]
 	cout << "===================================================" << endl;
 	//Testing Cycles in NFA to DFA conversion
 	NFA nfa6('c');
@@ -90,7 +93,6 @@ void do_tests(){
 	assert(cycle_dfa->get_states_count() == 4);
 	//Result == FAIL @ rev 40
 	//[Infinite loop due to duplicates in DFA conversion epsilon closure (each cell var contained duplicates)]
-
 	//Result == SUCESS @ rev 41
 	cout << "===================================================" << endl;
 	//testing combined NFA to DFA conversion

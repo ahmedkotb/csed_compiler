@@ -12,6 +12,7 @@
 #include <sstream>
 #include <map>
 #include <algorithm>
+#include <assert.h>
 using namespace std;
 
 class NFA_State {
@@ -51,14 +52,26 @@ public:
 	//returns state information
 	string get_description();
 
+	//getters and setters for state id
 	void set_id(int);
 	int get_id();
+
+	//sets this state as accepting of given token id
 	void set_token_id(int);
 	bool is_accepting_state();
 	int get_token_id();
+
+	//getters and setters for token id
 	void set_accepting_pattern(string);
 	string get_accepting_pattern();
+
 	vector<INPUT_CHAR>* get_transitions_inputs();
+
+	//get dfa transition , get the only item obtained from get_transitions
+	NFA_State * get_dfa_transition(INPUT_CHAR);
+	//replace transition of this state on given input to given state
+	void replace_dfa_transition(INPUT_CHAR,NFA_State*);
+
 	virtual ~NFA_State();
 };
 

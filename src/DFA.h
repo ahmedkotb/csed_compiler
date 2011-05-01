@@ -34,6 +34,9 @@ public:
     //get alphabet of this DFA
     set<INPUT_CHAR>* get_alphabet();
 
+    //minimizes the DFA
+    void minimize();
+
 private:
     //constructor is private
     DFA();
@@ -67,6 +70,12 @@ private:
 
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
     NFA_State* create_DFA_state(set<NFA_State*>* states);
+
+    //private method used to number states and return set of all states in this DFA
+    set<NFA_State*> * get_numbered_states();
+
+    //changes every pointer to state_b into state_a in the given set
+    void merge_states(NFA_State * state_a,NFA_State * state_b,set<NFA_State *>*);
 
 };
 

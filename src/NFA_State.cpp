@@ -52,6 +52,33 @@ set<NFA_State *>* NFA_State::get_transitions(INPUT_CHAR input) {
 		return get_transitions_helper(input); //normal case
 }
 
+NFA_State * NFA_State::get_dfa_transition(INPUT_CHAR input){
+	//epsilon is not allowed
+	assert(input != EPSILON);
+	set<NFA_State *> *states = get_transitions(input);
+
+	//states should contain 0 or 1 state
+	assert(states->size() < 2);
+
+	if (states->size() == 1){
+		set<NFA_State*>::iterator it = states->begin();
+		delete states;
+		return (*it);
+	}
+	delete states;
+	return NULL;
+}
+
+void NFA_State::replace_dfa_transition(INPUT_CHAR input,NFA_State* state){
+	//epsilon is not allowed
+	assert(input != EPSILON);
+	//remove old transition
+	transitions->erase(input);
+	//insert new transition
+	transitions->insert(pair<INPUT_CHAR, NFA_State*> (input, state));
+}
+
+
 set<NFA_State *>* NFA_State::get_transitions_helper(INPUT_CHAR input) {
 
 	set<NFA_State *> *result = new set<NFA_State *> ();

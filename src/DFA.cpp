@@ -6,6 +6,8 @@
  */
 
 #include "DFA.h"
+#define ALPHA(x,k) (*x)->get_dfa_transition(*k)
+#define DISTINCT(i,j) ((i) < (j) ? distinct())
 
 DFA::DFA() {
     start_state = new NFA_State();
@@ -68,13 +70,17 @@ NFA_State* DFA::create_DFA_state(set<NFA_State*>* states) {
     set<NFA_State*>::iterator it;
     //set accepting token of new DFA state to the accepting token of highest priority
     int min = 1 << 30;
+    string acc_pattern = "";
     for (it=states->begin() ; it != states->end() ; ++it){
     	if ((*it)->is_accepting_state() && (*it)->get_token_id() < min ){
     		min = (*it)->get_token_id();
+    		acc_pattern = (*it)->get_accepting_pattern();
     	}
     }
-    if (min != 1<<30)
+    if (min != 1<<30){
     	state->set_token_id(min);
+    	state->set_accepting_pattern(acc_pattern);
+    }
     return state;
 }
 
@@ -86,11 +92,15 @@ void DFA::convert_NFA_to_DFA(NFA* nfa) {
 }
 
 void DFA::number_states() {
+	delete get_numbered_states();
+}
+
+set<NFA_State*> * DFA::get_numbered_states(){
     //set used as visited flag for each state
-    set<NFA_State *> visited;
+    set<NFA_State *> *visited = new set<NFA_State *>();
     //bfs queue
     queue<NFA_State *> queue;
-    visited.insert(this->start_state);
+    visited->insert(this->start_state);
     queue.push(this->start_state);
 
     NFA_State * current_state;
@@ -107,9 +117,9 @@ void DFA::number_states() {
         for (unsigned int i = 0; i < inputs->size(); ++i) {
             states = current_state->get_transitions(inputs->at(i));
             for (it = states->begin() ;it != states->end();++it){
-    			if (visited.find(*it) == visited.end()){
+    			if (visited->find(*it) == visited->end()){
     				//a new state was found
-    				visited.insert(*it);
+    				visited->insert(*it);
     				queue.push(*it);
     			}
     		}
@@ -119,6 +129,7 @@ void DFA::number_states() {
         //delete the inputs vector that is created by get_transitions_inputs() method
         delete inputs;
     }
+    return visited;
 }
 
 void DFA::get_DFA(set<NFA_State*>* states, NFA* nfa) {
@@ -207,6 +218,106 @@ int DFA::get_states_count(){
 
 set<INPUT_CHAR>* DFA::get_alphabet(){
 	return this->alphabet;
+}
+
+
+void DFA::minimize(){
+
+	//steps
+	//1-number states and get all of them in set
+	//2-partition states on input (EPSILON)
+	//3-partition states using alphabet
+	//4-repeat step 3 till nothing changes
+	//5-merge non distinct states
+
+	// 1
+	set<NFA_State *> * states = this->get_numbered_states();
+	assert (states->size() == (unsigned int)this->get_states_count());
+	bool change;
+
+	//creating the 2d distinct flags array
+	bool ** distinct = new bool*[states->size()];
+	for (unsigned int i = 0; i < states->size(); ++i){
+		distinct[i] = new bool[states->size()];
+		for (unsigned int j = 0; j < states->size(); ++j) {
+			distinct[i][j] = false;
+		}
+	}
+
+	// 2 partition states on EPSILON input according to their token_id
+	for (set<NFA_State * >::iterator si = states->begin() ; si != states->end() ; ++si){
+		set<NFA_State * >::iterator sj = si;
+		++sj;
+		for (;sj != states->end() ; ++sj){
+			//
+			distinct[(*si)->get_id()][(*sj)->get_id()] = (*si)->get_token_id() != (*sj)->get_token_id();
+		}
+	}
+
+	//3
+	change = true;
+	while (change){
+		change = false;
+		for (set<NFA_State * >::iterator si = states->begin() ; si != states->end() ; ++si){
+			set<NFA_State * >::iterator sj = si;
+			++sj;
+			for (;sj != states->end() ; ++sj){
+				//two equivalent states
+				if (!distinct[(*si)->get_id()][(*sj)->get_id()]){
+					set<INPUT_CHAR>::iterator k;
+					for (k = alphabet->begin() ; k != alphabet->end() ; ++k){
+						//similar states (both go to dead state on this input)
+						if (ALPHA(si,k) == NULL && ALPHA(sj,k) == NULL) continue;
+						//different states
+						if (ALPHA(si,k) == NULL || ALPHA(sj,k) == NULL || distinct[ALPHA(si,k)->get_id()][ALPHA(sj,k)->get_id()]){
+							distinct[(*si)->get_id()][(*sj)->get_id()] = true;
+							change = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	//done flag .. used to optimize in merging
+	//if merged state A and state B , state B is marked as done
+	//so if states B and C found to be similar , we don't merge states B and C .. as state B will not be found
+	bool * done = new bool[states->size()];
+	for (unsigned int i = 0; i < states->size(); ++i)
+		done[i] = false;
+
+	//5
+	for (set<NFA_State * >::iterator si = states->begin() ; si != states->end() ; ++si){
+		set<NFA_State * >::iterator sj = si;
+		++sj;
+		for (;sj != states->end() ; ++sj){
+			if (done[(*sj)->get_id()]) continue;
+			if (!distinct[(*si)->get_id()][(*sj)->get_id()]){
+				merge_states(*si,*sj,states);
+				done[(*sj)->get_id()] = true;
+				//decrement number of states
+				--this->states_count;
+			}
+		}
+	}
+	//freeing memory
+	for (unsigned int i = 0; i < states->size(); ++i)
+		delete distinct[i];
+	delete distinct;
+	delete states;
+	delete done;
+}
+
+void DFA::merge_states(NFA_State * state_a,NFA_State * state_b,set<NFA_State *>* states){
+	//Steps
+	for (set<NFA_State * >::iterator si = states->begin() ; si != states->end() ; ++si){
+		if ((*si) == state_b) continue;
+		set<INPUT_CHAR>::iterator k;
+		for (k = alphabet->begin() ; k != alphabet->end() ; ++k){
+			if (ALPHA(si,k) == state_b)
+				(*si)->replace_dfa_transition(*k , state_a);
+		}
+	}
 }
 void DFA::debug() {
     cout << "Number of States : " << this->states_count << endl;
