@@ -79,15 +79,16 @@ Parsing_output* Parser::parse(string file_name){
 void Parser::gotOper(string opThis, int prec1) {
 	while (!op_Stack.empty()) {
 		string opTop = op_Stack.top();
+		int opTop_len = opTop.length();
 		op_Stack.pop();
-		if (opTop == "(") {
+		if (opTop.length() == 2 &&opTop.substr(1) == "(") {
 			op_Stack.push(opTop);
 			break;
 		} else {
 			int prec2;
-			if (opTop == "|") {
+			if (opTop.length() == 2 &&opTop.substr(1) == "|") {
 				prec2 = 1;
-			} else if (opTop == " ") {
+			} else if (opTop.length() == 2 &&opTop.substr(1) == " ") {
 				prec2 = 2;
 			} else {
 				prec2 = 3;
@@ -106,7 +107,7 @@ void Parser::gotParen(string ch) {
 	while (!op_Stack.empty()) {
 		string chx = op_Stack.top();
 		op_Stack.pop();
-		if (chx == "(")
+		if (chx.length() == 2 &&chx.substr(1) == "(")
 			break;
 		else
 			output->push_back(chx);
@@ -118,15 +119,16 @@ NFA* Parser::get_post_fix(string name , vector<string>* value,bool isRD) {
 	output->clear();
 	for (unsigned int j = 0; j < value->size(); j++) {
 		string ch = value->at(j);
-		if (ch == " ") {
+		int ch_len = ch.length();
+		if (ch_len == 2 && ch.substr(1,1) == " ") {
 			gotOper(ch, 2);
-		} else if (ch == "*" || ch == "+") {
+		} else if (ch_len == 2 && (ch.substr(1,1) == "*" || ch.substr(1,1) == "+")) {
 			gotOper(ch, 3); // go pop operators
-		} else if (ch == "|") {
+		} else if (ch_len == 2 && ch.substr(1,1) == "|") {
 			gotOper(ch, 1); // go pop operators
-		} else if (ch == "(") {
+		} else if (ch_len == 2 && ch.substr(1,1) == "(") {
 			op_Stack.push(ch); // push it
-		} else if (ch == ")") {
+		} else if (ch_len == 2 && ch.substr(1,1) == ")") {
 			gotParen(ch); // go pop operators
 		} else { // write it to output
 			output->push_back(ch);
@@ -163,7 +165,9 @@ NFA * Parser::createByBaseCase(string str) {
 	if (str[1] == '-')
 		ret = new NFA((INPUT_CHAR) str[0], (INPUT_CHAR) str[2]);
 	else
+	{
 		ret = new NFA(str);
+	}
 	return ret;
 }
 
@@ -171,7 +175,7 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 	stack <NFA*>* operand_stack = new stack<NFA*>();
 	for (unsigned int i = 0; i < in->size(); i++) {
 		string cur = in->at(i);
-		if (!isOperator(cur)) //This is an operand
+		if (!(cur.length() == 2 && isOperator(cur.substr(1,1)))) //This is an operand
 		{
 			map<string, vector<string> *>::iterator it = RDMap->find(cur);
 			if (it == RDMap->end()) //This is a sequence or Range .....Base case
@@ -186,13 +190,16 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 		}
 		else //This is an operator
 		{
+			cur = cur.substr(1,1);
 			int operation = -1;
 			if (cur == OR)
 			{
 				operation = NFA_JOIN_OR;
 			}
 			else if (cur == CONCATINATE)
+			{
 				operation = NFA_JOIN_CONCATENATE;
+			}
 			//Kleene Closure
 			else if (cur == CLOSURE) {
 				NFA * result = operand_stack->top();
@@ -228,8 +235,9 @@ NFA* Parser::stringToNFA(vector<string> *in) {
 
 bool Parser::isSpecialChar(char c) {
 	for (int i = 0; i < SPECIAL_NUM; i++) {
-		if (c == special_char[i])
+		if (c == special_char[i]){
 			return true;
+		}
 	}
 	return false;
 }
@@ -253,7 +261,7 @@ void Parser::split(string line) {
 			lastIsSpace = false;
 			if (end >= st && look_back) //Storing the accumulated string
 			{
-				tokens->push_back(line.substr(st, end - st + 1));
+				tokens->push_back(line.substr(st,end -st +1));
 				st = end + 1;
 				look_back = false;
 			}
@@ -262,10 +270,17 @@ void Parser::split(string line) {
 			if (cur_char == '(' && isRHS) {
 				if (!isSpecialChar(lastChar) || lastChar == '+' || lastChar
 						== '*' || lastChar == ')')
-					tokens->push_back(CONCATINATION_SYMBOL);
+				{
+					string temp = DELIMETER;
+					temp.append(CONCATINATION_SYMBOL);
+					tokens->push_back(temp);
+				}
 			}
 			str = cur_char;
-			tokens->push_back(str);
+			string temp = DELIMETER;
+			temp = temp + cur_char;
+			//tokens->push_back(str);
+			tokens->push_back(temp);
 			st++;
 			end++;
 			if (str == "=" || str == ":")
@@ -282,9 +297,14 @@ void Parser::split(string line) {
 			if (isRHS) {
 				if (!isSpecialChar(lastChar) || lastChar == '+' || lastChar
 						== '*' || lastChar == ')')
-					tokens->push_back(CONCATINATION_SYMBOL);
+				{
+				string temp = DELIMETER;
+				temp.append(CONCATINATION_SYMBOL);
+				tokens->push_back(temp);
+				}
 			}
-			str = cur_char + line[++i];
+			//str = cur_char + line[++i];
+			str = line[++i];
 			tokens->push_back(str); //pushing the current character and the next one
 			st += 2;
 			end += 2;
@@ -305,12 +325,18 @@ void Parser::split(string line) {
 			end++;
 			look_back = true;
 			if (isSpecialChar(lastChar)) {
-				if (lastChar == '+' || lastChar == '*' || lastChar == ')')
-					tokens->push_back(" ");
+				if (lastChar == '+' || lastChar == '*' || lastChar == ')'){
+					string temp = DELIMETER;
+					temp.append(CONCATINATION_SYMBOL);
+					tokens->push_back(temp);
+				}
 			} else //The last character is not a special character
 			{
-				if (lastIsSpace && isRHS)
-					tokens->push_back(" ");
+				if (lastIsSpace && isRHS){
+					string temp = DELIMETER;
+					temp.append(CONCATINATION_SYMBOL);
+					tokens->push_back(temp);
+				}
 			}
 
 			if (i == line.length() - 1) {
@@ -380,8 +406,13 @@ void Parser::install_punctuation(){
 }
 
 void Parser::select_line_type(vector<string> * tokens){
+	string equal = DELIMETER;
+	equal.append("=");
+	string column = DELIMETER;
+	column.append(":");
+	int first_len = tokens->operator [](0).length();
 	//check if the first element in the vector tokens is [ punctuation
-	if(tokens->operator [](0) == START_PUNCTUATION)
+	if(first_len == 2 && tokens->operator [](0).substr(1,1) == START_PUNCTUATION)
 	{
 		//Add the punctuation to the punctuation vector
 		for(unsigned int i = 1 ; i < tokens->size() -1 ; i++)
@@ -389,7 +420,7 @@ void Parser::select_line_type(vector<string> * tokens){
 		return;
 	}
 	//Check if the first element in the vector tokens is{ key word
-	else if(tokens->operator [](0) == START_KEYWORD)
+	else if(first_len == 2 && tokens->operator [](0).substr(1,1) == START_KEYWORD)
 	{
 		for(unsigned int i = 1 ; i < tokens->size() -1; i ++)
 		{
@@ -397,7 +428,7 @@ void Parser::select_line_type(vector<string> * tokens){
 		}
 	}
 	//Regular definition
-	else if(tokens->operator [](1) == "=")
+	else if(tokens->operator [](1) == equal)
 	{
 		string rd_name = tokens->operator [](0);
 		vector<string>* rd = new vector<string>();
@@ -406,7 +437,7 @@ void Parser::select_line_type(vector<string> * tokens){
 		get_post_fix(rd_name , rd , true);
 	}
 	//copying the regular expression
-	else if(tokens->operator [](1) == ":") //RE
+	else if(tokens->operator [](1) == column) //RE
 	{
 		string re_name = tokens->operator [](0);
 		vector<string>* re = new vector<string>();

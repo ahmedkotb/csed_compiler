@@ -16,12 +16,14 @@
 #include <string>
 #include "NFA.h"
 #include <map>
+#include <sstream>
 #include "Parsing_output.h"
 //Constants
 #define RE 0
 #define RD 1
 #define START_PUNCTUATION "["		//The first tokens of the punctuation line
 #define START_KEYWORD "{"			//The first token in the keywords line
+#define DELIMETER "\\"
 //Operators
 #define OR "|"
 #define CONCATINATE " "
