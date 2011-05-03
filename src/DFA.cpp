@@ -6,6 +6,8 @@
  */
 
 #include "DFA.h"
+#include <iomanip>
+
 #define ALPHA(x,k) (*x)->get_dfa_transition(*k)
 #define ALPHA_NUM(x,k) (*x)->get_dfa_transition(*k)->get_id()
 #define DISTINCT(i,j) ((i) < (j) ? distinct())
@@ -368,29 +370,29 @@ void DFA::debug() {
 void DFA::write_transition_table(string file_name,vector<string>* tokens){
 	//number the states first
 	set<NFA_State *> * states = this->get_numbered_states();
-	//ofstream cout;
-	//cout.open(file_name.c_str());
-	cout << "State\t|\tToken\t";
+	ofstream myfile;
+	myfile.open(file_name.c_str());
+	myfile << setw(9) << left << "  State"  << "|" << setw(12) << left << "    Token";
     for (set<INPUT_CHAR>::iterator it = alphabet->begin(); it != alphabet->end(); it++) {
-    	cout << "\t| " << (char) (*it) << " |";
+    	myfile <<  "|   " <<setw(4) << left << (char) (*it);
     }
-    cout << '\n';
+    myfile << "|\n";
     for (set<NFA_State*>::iterator it = states->begin(); it != states->end() ; ++it){
     	if ((*it)->get_token_id() > -1)
-    		cout << (*it)->get_id() << "\t|\t" << tokens->at((*it)->get_token_id()) << "\t";
+    		myfile << "    " << setw(5) << left << (*it)->get_id() << "|    " << setw(8) << left <<tokens->at((*it)->get_token_id());
     	else
-    		cout << (*it)->get_id() << "\t|\t none \t";
+    		myfile << "    " << setw(5) << left << (*it)->get_id() << "|" << setw(12) << left << "     NONE";
 
     	for (set<INPUT_CHAR>::iterator k = alphabet->begin(); k != alphabet->end(); k++) {
     		if (ALPHA(it,k))
-    	    	cout << "\t| " << ALPHA_NUM(it,k) << " |";
+    	    	myfile << "|   " << setw(4) << left << ALPHA_NUM(it,k);
     		else
-    			cout << "\t| - |";
+    			myfile << "|   -   ";
     	}
-        cout << '\n';
+        myfile << "|\n";
     }
 
-	//cout.close();
+	myfile.close();
 	delete states;
 }
 //int main() {
