@@ -127,10 +127,10 @@ void NFA_State::set_id(int new_id) {
 	id = new_id;
 }
 
-int NFA_State::get_id(){
+int NFA_State::get_id() {
 	return this->id;
 }
-void NFA_State::set_token_id(int token_id){
+void NFA_State::set_token_id(int token_id) {
 	//marks this state as accepting state with the given token id
 	this->is_accepting = true;
 	this->token_id = token_id;
@@ -154,14 +154,14 @@ vector<INPUT_CHAR>* NFA_State::get_transitions_inputs() {
 string NFA_State::get_description() {
 	stringstream info;
 	info << "----------------------------------------------\n";
-	info << "State ID = " << (id >= 0 ? id : (int) this)  << "\n";
+	info << "State ID = " << (id >= 0 ? id : (int) this) << "\n";
 	info << "Accepting Pattern = " << accepting_pattern << "\n";
 	if (is_accepting)
 		info << "State Type = ACCEPTING Token with ID = " << token_id << "\n";
 	else
 		info << "State Type = Normal\n";
 
-	if (transitions->size() > 0){
+	if (transitions->size() > 0) {
 		info << "Transitions :\n";
 		info << "=============\n";
 		string input;
@@ -259,4 +259,5 @@ NFA_State::~NFA_State() {
 //
 //	return 0;
 //}
+
 

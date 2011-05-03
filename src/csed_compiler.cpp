@@ -10,6 +10,7 @@
 #include "NFA.h"
 #include "DFA.h"
 #include "Parser.h"
+#include "Driver.h"
 using namespace std;
 
 void do_tests();
@@ -125,10 +126,17 @@ void parsing_tests(){
 	NFA* nfa= output->get_combinedNFA();
 	//nfa->debug();
 	DFA* dfa = new DFA(nfa);
+	dfa->number_states();
+	//dfa->minimize();
+	cout<<"________________________________________________________________________\n";
+
+	Driver* div = new Driver(dfa,"input",tokens);
+	div->simulate();
+	cout<<"________________________________________________________________________\n";
 	//dfa->debug();
-	dfa->minimize();
-	dfa->debug();
-	dfa->write_transition_table("./test",tokens);
+	//dfa->minimize();
+	//dfa->debug();
+	//dfa->write_transition_table("./test",tokens);
 }
 void do_tests(){
 	nfa_dfa_tests();
