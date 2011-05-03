@@ -116,16 +116,19 @@ void parsing_tests(){
 	//ON WINDOWS
 	//Parsing_output* combined_nfa = p->parse("tests\t1");
 	//ON Linux
-	Parsing_output* output = p->parse("./tests/t1");
+	Parsing_output* output = p->parse("./tests/t0");
 	vector<string>::iterator it;
 	vector<string>* tokens = output->get_lan_tokens();
 	cout << "Tokens :" << endl;
 	for(it = tokens->begin(); it != tokens->end() ; it++)
 		cout << (*it)<<endl;
 	NFA* nfa= output->get_combinedNFA();
+	//nfa->debug();
 	DFA* dfa = new DFA(nfa);
+	//dfa->debug();
 	dfa->minimize();
 	dfa->debug();
+	dfa->write_transition_table("./test",tokens);
 }
 void do_tests(){
 	nfa_dfa_tests();

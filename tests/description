@@ -1,0 +1,14 @@
+#-------------------------------------------------
+t0
+problem 1 in sheet 3 without the special word else
+#-------------------------------------------------
+t1
+a simpler version of t0
+#-------------------------------------------------
+t2
+example in project pdf with the following changes
+
+digit = 0-9        INSTEAD_OF   digit = 0 - 9
+assign: \=         INSTEAD_OF   assign: =
+[; , \( \) \{ \}]  INSTEAD_OF   [; , \( \) { }]
+#-------------------------------------------------

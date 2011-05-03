@@ -10,6 +10,7 @@
 
 #include "NFA_State.h"
 #include "NFA.h"
+#include <fstream>
 
 class DFA {
 public:
@@ -36,6 +37,9 @@ public:
 
     //minimizes the DFA
     void minimize();
+
+    //writes transition table to a file
+    void write_transition_table(string file_name,vector<string>* tokens);
 
 private:
     //constructor is private
