@@ -298,8 +298,6 @@ void DFA::minimize(){
 			if (!distinct[(*si)->get_id()][(*sj)->get_id()]){
 				merge_states(*si,*sj,states);
 				done[(*sj)->get_id()] = true;
-				//decrement number of states
-				--this->states_count;
 			}
 		}
 	}
@@ -307,8 +305,11 @@ void DFA::minimize(){
 	for (unsigned int i = 0; i < states->size(); ++i)
 		delete distinct[i];
 	delete distinct;
-	delete states;
 	delete done;
+	delete states;
+	states = this->get_numbered_states();
+	this->states_count = states->size();
+	delete states;
 }
 
 void DFA::merge_states(NFA_State * state_a,NFA_State * state_b,set<NFA_State *>* states){
