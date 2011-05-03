@@ -12,12 +12,8 @@ using namespace std;
 string operators[OPERATOR_NUM] = { "*", "+", "|", " " };
 //The special chars
 char special_char[SPECIAL_NUM] = { '{', '}', '[', ']', '|', '=', ':', '+', '*',
-		'(', ')' };
-//The tokens of the input line
-
-//Parser::Parser(vector<string>* in) {
-//	input = in;
-//}
+		'(', ')' ,'-'};
+string w_s[WS_NUM] = {" " , "\t" , "\n"};
 
 Parser::Parser() {
 	 this->output = new vector<string>();
@@ -166,7 +162,11 @@ NFA * Parser::createByBaseCase(string str) {
 		ret = new NFA((INPUT_CHAR) str[0], (INPUT_CHAR) str[2]);
 	else
 	{
-		ret = new NFA(str);
+		if(str == IN_EPSLON){
+			ret = new NFA(EPSILON);
+		}
+		else
+			ret = new NFA(str);
 	}
 	return ret;
 }
@@ -259,7 +259,37 @@ void Parser::split(string line) {
 		if (isSpecialChar(cur_char)) //current char is special char and is inserted directly
 		{
 			lastIsSpace = false;
-			if (end >= st && look_back) //Storing the accumulated string
+			if(cur_char == RANGE){	//the current character is "-" for the range
+				//accumulate the range
+				stringstream ss;
+				if(i != 0 &&line[i-1] != ' ' && line[i-1] != '\t'){
+					//push the start of the range in case there is no white spaces before "-" meaning that the start range is not accumalted
+					ss<<lastChar;	//Start of the range
+				}
+				else{
+					string temp = tokens->operator [](tokens->size()-1);
+					tokens->pop_back();
+					ss<<temp;
+				}
+
+				ss<<cur_char;	//Add "-"
+
+				int temp = i + 1;
+				for(i = temp ; i < line.length(); i++)		//Get the end of the range
+				{
+					end++;
+					if(line[i] == ' ' || line[i] == '\t')
+						continue;
+					//s.append(""+line[i]);	//Append the end range
+					ss<<line[i];
+				}
+				string r;
+				ss>>r;
+				tokens->push_back(r);
+				st = end+1;
+			}
+			else{
+				if (end >= st && look_back) //Storing the accumulated string
 			{
 				tokens->push_back(line.substr(st,end -st +1));
 				st = end + 1;
@@ -286,7 +316,8 @@ void Parser::split(string line) {
 			if (str == "=" || str == ":")
 				isRHS = true;
 			lastChar = cur_char;
-		} else if (cur_char == '\\') //Current char is \ meaning that it's followed by a special character
+			}
+		  } else if (cur_char == '\\') //Current char is \ meaning that it's followed by a special character
 		{
 			if (end >= st && look_back) //Storing the accumulated string
 			{
@@ -303,9 +334,11 @@ void Parser::split(string line) {
 				tokens->push_back(temp);
 				}
 			}
-			//str = cur_char + line[++i];
 			str = line[++i];
-			tokens->push_back(str); //pushing the current character and the next one
+			if(str == "L")
+				tokens->push_back(IN_EPSLON); //Epsilon
+			else
+				tokens->push_back(str); //pushing the current character and the next one
 			st += 2;
 			end += 2;
 			lastChar = '\\' + line[i];
@@ -350,8 +383,43 @@ void Parser::split(string line) {
 	select_line_type(tokens);
 	delete(tokens);
 }
+void Parser::add_white_spaces(){
+	//Concstants strings that will be used
+	//or operator
+	string or_operator = DELIMETER;
+	or_operator.append("|");
+	//+ operator
+	string plus_closure_op = DELIMETER;
+	plus_closure_op.append("+");
+	//left bracket
+	string left_bracket = DELIMETER;
+	left_bracket.append("(");
+	//right bracket
+	string right_bracket = DELIMETER;
+	right_bracket.append(")");
+	//prepare the RE of the white space as hard coded
+	vector <string>* temp_ws= new vector<string>;
+	temp_ws->push_back(left_bracket);
+	for(int i = 0 ; i < WS_NUM ; i ++){
+		temp_ws->push_back(w_s[i]);
+		if(i != WS_NUM -1)
+			temp_ws->push_back(or_operator);
+	}
+	temp_ws->push_back(right_bracket);
+	temp_ws->push_back(plus_closure_op);
+	//get the nfa of the given keyword
+	 NFA* nfa = get_post_fix(WHITE_SPACES_NAME,temp_ws,false);
+	 //add the nfa to the list of nfa's in this language
+	 this->NFAS->push_back(nfa);
+	 //add this token to lan_token vector
+	 this->lan_tokens->push_back(WHITE_SPACES_NAME);
+	 //Finalizing nfa
+	 nfa->finalize_NFA(lan_tokens->size()-1);
+}
 
 NFA* Parser::addTokens(){
+		//Add the white space to the head of the table
+		add_white_spaces();
 		//add keywords to the id's in this language
 		install_Keywords();
 		//add the punctuation to the id's in the langauge

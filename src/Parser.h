@@ -19,6 +19,8 @@
 #include <sstream>
 #include "Parsing_output.h"
 //Constants
+#define  RANGE '-'
+#define  IN_EPSLON "\L"
 #define RE 0
 #define RD 1
 #define START_PUNCTUATION "["		//The first tokens of the punctuation line
@@ -29,9 +31,12 @@
 #define CONCATINATE " "
 #define CLOSURE "*"
 #define POSITIVE_CLOSURE "+"
-#define SPECIAL_NUM 11
+#define SPECIAL_NUM 12
 #define CONCATINATION_SYMBOL " "
 #define OPERATOR_NUM 4
+#define WS_NUM 3
+#define WHITE_SPACES_NAME "White Space"
+#define WHITE_SPACE_ID 0
 using namespace std;
 
 class Parser {
@@ -66,6 +71,7 @@ private:
 	NFA* addTokens();
 	vector<NFA*>* getNFAS();
 	vector<string>* getTokens();
+	void add_white_spaces();
 };
 
 #endif	/* TREE_BUILDER_H */
