@@ -374,7 +374,15 @@ void DFA::write_transition_table(string file_name,vector<string>* tokens){
 	myfile.open(file_name.c_str());
 	myfile << setw(9) << left << "  State"  << "|" << setw(12) << left << "    Token";
     for (set<INPUT_CHAR>::iterator it = alphabet->begin(); it != alphabet->end(); it++) {
-    	myfile <<  "|   " <<setw(4) << left << (char) (*it);
+			string input;
+			if (*it == '\n')
+				myfile <<  "|   " <<setw(4) << left << "ENTER";
+			else if (*it == '\t')
+				myfile <<  "|   " <<setw(4) << left << "TAB";
+			else if (*it == ' ')
+				myfile <<  "|   " <<setw(4) << left << "SPACE";
+			else
+				myfile <<  "|   " <<setw(4) << left << (char) (*it);
     }
     myfile << "|\n";
     for (set<NFA_State*>::iterator it = states->begin(); it != states->end() ; ++it){
@@ -385,7 +393,7 @@ void DFA::write_transition_table(string file_name,vector<string>* tokens){
 
     	for (set<INPUT_CHAR>::iterator k = alphabet->begin(); k != alphabet->end(); k++) {
     		if (ALPHA(it,k))
-    	    	myfile << "|   " << setw(4) << left << ALPHA_NUM(it,k);
+      			myfile << "|   " << setw(4) << left << ALPHA_NUM(it,k);
     		else
     			myfile << "|   -   ";
     	}
