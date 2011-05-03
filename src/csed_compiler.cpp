@@ -116,7 +116,7 @@ void parsing_tests(){
 	//ON WINDOWS
 	//Parsing_output* combined_nfa = p->parse("tests\t1");
 	//ON Linux
-	Parsing_output* output = p->parse("./tests/t0");
+	Parsing_output* output = p->parse("./tests/t2");
 	vector<string>::iterator it;
 	vector<string>* tokens = output->get_lan_tokens();
 	cout << "Tokens :" << endl;

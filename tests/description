@@ -11,4 +11,5 @@ example in project pdf with the following changes
 digit = 0-9        INSTEAD_OF   digit = 0 - 9
 assign: \=         INSTEAD_OF   assign: =
 [; , \( \) \{ \}]  INSTEAD_OF   [; , \( \) { }]
+addop: \+ | \-     INSTEAD_OF   addop: \+ | -
 #-------------------------------------------------

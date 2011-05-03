@@ -64,13 +64,13 @@ private:
     NFA_State * start_state;
 
     //map returns a DFA state representing the given id of NFA states
-    map <int, NFA_State*> states_IDS;
+    map <long, NFA_State*> states_IDS;
 
     // return the IDs of the given NFA states
     vector<int> * get_IDS(set<NFA_State*>* states);
 
     // takes a victor of integer and return an integer representing the result of hashing
-    int hash(vector<int> *ids);
+    long hash(vector<int> *ids);
 
     // create a DFA state representing the given NFA states and sets the accepting pattern of the DFA state
     NFA_State* create_DFA_state(set<NFA_State*>* states);

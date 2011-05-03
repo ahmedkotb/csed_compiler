@@ -8,5 +8,5 @@ relop: \=\= | !\= | > | >\= | < | <\=
 assign: \=
 { if else while }
 [; , \( \) \{ \}]
-addop: \+ | -
+addop: \+ | \-
 mulop: \* | /

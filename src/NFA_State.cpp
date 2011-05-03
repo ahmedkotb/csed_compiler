@@ -166,10 +166,17 @@ string NFA_State::get_description() {
 		info << "=============\n";
 		string input;
 		for (iterate = transitions->begin(); iterate != transitions->end(); ++iterate) {
-			if (iterate->first >= 0)
-				input =(char)iterate->first;
-			else
+			if (iterate->first == EPSILON)
 				input = "EPSILON";
+			else if ((char)iterate->first == '\n')
+				input = "ENTER";
+			else if ((char)iterate->first == '\t')
+				input = "TAB";
+			else if ((char)iterate->first == ' ')
+				input = "SPACE";
+			else
+				input = (char)iterate->first;
+
 			info << "[" << input << "  =>  " << iterate->second->id << "] , ";
 		}
 		info << "\n";

@@ -57,10 +57,10 @@ vector<int> * DFA::get_IDS(set<NFA_State*>* states) {
     return ids;
 }
 
-int DFA::hash(vector<int>* ids) {
+long DFA::hash(vector<int>* ids) {
 	//sort the vector to obtain the same hash
 	sort(ids->begin(),ids->end());
-    int hash = 0;
+    long hash = 0;
     for (unsigned int i = 0; i < ids->size(); i++) {
         hash += ids->at(i);
         hash *= 37;
@@ -142,15 +142,15 @@ void DFA::get_DFA(set<NFA_State*>* states, NFA* nfa) {
 
     // vector holding the ids of the states
     vector<int>* ids = this->get_IDS(states);
-    int hash = this->hash(ids);
+    long hash = this->hash(ids);
     delete ids;
-    map <int, NFA_State*>::iterator iterator = states_IDS.find(hash);
+    map <long, NFA_State*>::iterator iterator = states_IDS.find(hash);
 
     NFA_State * current;
     if (iterator == states_IDS.end()) {
         current = create_DFA_state(states);
         ++this->states_count;
-        states_IDS.insert(pair<int, NFA_State*>(hash, current));
+        states_IDS.insert(pair<long, NFA_State*>(hash, current));
 
     } else {
         current = iterator->second;
@@ -188,7 +188,7 @@ void DFA::get_DFA(set<NFA_State*>* states, NFA* nfa) {
         // new states appeared in the table and needs new row
         if (cell->size() != 0) {
             vector<int> *ids = this->get_IDS(cell);
-            int hash = this->hash(ids);
+            long hash = this->hash(ids);
             iterator = states_IDS.find(hash);
 
             NFA_State* going;
@@ -197,7 +197,7 @@ void DFA::get_DFA(set<NFA_State*>* states, NFA* nfa) {
                 ++this->states_count;
                 // add state to current row
                 row_new_states->push_back(cell);
-                states_IDS.insert(pair<int, NFA_State*>(hash, going));
+                states_IDS.insert(pair<long, NFA_State*>(hash, going));
             } else {
                 going = iterator->second;
             }
