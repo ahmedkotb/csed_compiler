@@ -112,7 +112,7 @@ void Driver::simulate() {
 	NFA_State *state = dfa ->get_start_state();
 	int last_accepting = -1;
 	while (simulateDone < 2) {
-		cout << *lexeme_begin << "  " << *forward << "\n";
+		//cout << *lexeme_begin << "  " << *forward << "\n";
 		char input_char = *forward;
 		//longest matched token
 		if (state ->is_accepting_state())
@@ -151,7 +151,7 @@ void Driver::simulate() {
 				token_name = tokens->at(last_accepting);
 
 				symbol_table[lexeme] = token_name;
-				cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
+				//cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
 				if(token_name.compare("White Space") != 0)
 					fout<<token_name<<"\n";
 				lexeme_begin = forward;
