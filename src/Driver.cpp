@@ -120,9 +120,10 @@ void Driver::simulate() {
 				fout << "Exception   => " << create_lexem(lexeme_begin ,forward)<<"\n";
 				//recover
 				forward++;
+				lexeme_begin++;
 				forward_counter++;
 			} else {
-				lexeme = create_lexem(lexeme_begin, forward);
+				lexeme = create_lexem(lexeme_begin, forward );
 				//get token name
 				token_name = tokens->at(last_accepting);
 
@@ -130,10 +131,11 @@ void Driver::simulate() {
 				//cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
 				if(token_name.compare("White Space") != 0)
 					fout<<token_name<<"\n";
+				lexeme_begin = forward;
 			}
 			last_accepting = -1;
 			state = dfa->get_start_state();
-			lexeme_begin = forward;
+			//lexeme_begin = forward;
 			lexeme_begin_buffer_num = forward_buffer_num;
 			lexeme_begin_counter = forward_counter;
 			update = false;
