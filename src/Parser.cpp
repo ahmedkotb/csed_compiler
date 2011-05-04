@@ -251,6 +251,7 @@ void Parser::split(string line) {
 	char lastChar;
 	bool isRHS = false; //To indicate if the RHS is proccessed now or not yet
 	bool lastIsSpace = false;
+	bool lastIsSkip = false;
 	string str;
 	vector<string>* tokens = new vector<string>();
 
@@ -259,6 +260,7 @@ void Parser::split(string line) {
 		if (isSpecialChar(cur_char)) //current char is special char and is inserted directly
 		{
 			lastIsSpace = false;
+			lastIsSkip = false;
 			if(cur_char == RANGE){	//the current character is "-" for the range
 				//accumulate the range
 				stringstream ss;
@@ -282,6 +284,7 @@ void Parser::split(string line) {
 						continue;
 					//s.append(""+line[i]);	//Append the end range
 					ss<<line[i];
+					break;
 				}
 				string r;
 				ss>>r;
@@ -317,8 +320,10 @@ void Parser::split(string line) {
 				isRHS = true;
 			lastChar = cur_char;
 			}
-		  } else if (cur_char == '\\') //Current char is \ meaning that it's followed by a special character
+		  }
+		else if (cur_char == '\\') //Current char is \ meaning that it's followed by a special character
 		{
+			lastIsSkip = true;
 			if (end >= st && look_back) //Storing the accumulated string
 			{
 				tokens->push_back(line.substr(st, end - st + 1));
@@ -343,8 +348,10 @@ void Parser::split(string line) {
 			end += 2;
 			lastChar = '\\' + line[i];
 			lastIsSpace = false;
-		} else if (cur_char == ' ' || cur_char == '\t') {
+		}
+		else if (cur_char == ' ' || cur_char == '\t') {
 			lastIsSpace = true;
+			lastIsSkip = false;
 			if (end >= st && look_back) {
 				tokens->push_back(line.substr(st, end - st + 1));
 				st = end + 2;
@@ -365,7 +372,7 @@ void Parser::split(string line) {
 				}
 			} else //The last character is not a special character
 			{
-				if (lastIsSpace && isRHS){
+				if ((lastIsSpace||lastIsSkip) && isRHS){
 					string temp = DELIMETER;
 					temp.append(CONCATINATION_SYMBOL);
 					tokens->push_back(temp);
@@ -377,6 +384,7 @@ void Parser::split(string line) {
 			}
 			lastChar = cur_char;
 			lastIsSpace = false;
+			lastIsSkip = false;
 		}
 	}
 	//add each line to it's appropriate list
