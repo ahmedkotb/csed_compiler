@@ -16,9 +16,37 @@ using namespace std;
 void do_tests();
 
 int main() {
+
 	cout << "The Best Compiler isA" << endl;
-	do_tests();
+	cout << "=====================" << endl;
+
+	string input_file_path = "./tests/t2";
+	string source_file_path = "./input";
+
+	//-------------------------------------------------
+	Parser* p = new Parser();
+	Parsing_output* output = p->parse(input_file_path);
+	vector<string>::iterator it;
+	vector<string>* tokens = output->get_lan_tokens();
+
+	//tokens
+	cout << "Tokens :" << endl;
+	for(it = tokens->begin(); it != tokens->end() ; it++)
+		cout << (*it)<<endl;
+
+	//nfa
+	NFA* nfa= output->get_combinedNFA();
+	//dfa
+	DFA* dfa = new DFA(nfa);
+	dfa->minimize();
+	//transition table
+	dfa->write_transition_table("./transition_table",tokens);
+
+	Driver* div = new Driver(dfa,source_file_path,tokens);
+	div->simulate();
+
 	return 0;
+
 }
 void nfa_dfa_tests(){
 	cout << "===================================================" << endl;
@@ -129,14 +157,14 @@ void parsing_tests(){
 	dfa->number_states();
 	//dfa->minimize();
 	cout<<"________________________________________________________________________\n";
-
 	Driver* div = new Driver(dfa,"input",tokens);
 	div->simulate();
 	cout<<"________________________________________________________________________\n";
 	//dfa->debug();
-	//dfa->minimize();
-	//dfa->debug();
+	dfa->minimize();
+	dfa->debug();
 	//dfa->write_transition_table("./test",tokens);
+
 }
 void do_tests(){
 	nfa_dfa_tests();
