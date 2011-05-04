@@ -34,7 +34,10 @@ char* Driver::read_file() {
 
 	// read data as a block:
 	is.read(buffer, BUFFER_SIZE);
-	buffer[is.gcount()] = '\0';
+	//if(buffer[is.gcount()] != 10)
+		//buffer[is.gcount()] = '\0';
+	//else
+		buffer[is.gcount() -1] = '\0';
 
 	return buffer;
 }
@@ -172,7 +175,7 @@ void Driver::simulate() {
 		}
 		if(simulateDone>0)
 			simulateDone++;
-		if(*forward == '\0')
+		if(*forward == '\0' )
 			simulateDone++;
 
 	}

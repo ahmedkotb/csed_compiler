@@ -7,7 +7,7 @@
 
 #ifndef DRIVER_H_
 #define DRIVER_H_
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 8192
 #define OUTPUT_FILE "./tests/out.txt"
 #include "DFA.h"
 #include <iostream>
