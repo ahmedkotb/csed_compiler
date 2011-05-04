@@ -10,7 +10,7 @@
 
 #define ALPHA(x,k) (*x)->get_dfa_transition(*k)
 #define ALPHA_NUM(x,k) (*x)->get_dfa_transition(*k)->get_id()
-#define DISTINCT(i,j) ((i) < (j) ? distinct())
+#define DISTINCT(i,j) ((i) < (j) ? distinct[i][j] : distinct[j][i])
 
 DFA::DFA() {
     start_state = new NFA_State();
@@ -253,7 +253,7 @@ void DFA::minimize(){
 		++sj;
 		for (;sj != states->end() ; ++sj){
 			//
-			distinct[(*si)->get_id()][(*sj)->get_id()] = (*si)->get_token_id() != (*sj)->get_token_id();
+			DISTINCT((*si)->get_id(),(*sj)->get_id()) = (*si)->get_token_id() != (*sj)->get_token_id();
 		}
 	}
 
@@ -266,14 +266,14 @@ void DFA::minimize(){
 			++sj;
 			for (;sj != states->end() ; ++sj){
 				//two equivalent states
-				if (!distinct[(*si)->get_id()][(*sj)->get_id()]){
+				if (!DISTINCT((*si)->get_id(),(*sj)->get_id())){
 					set<INPUT_CHAR>::iterator k;
 					for (k = alphabet->begin() ; k != alphabet->end() ; ++k){
 						//similar states (both go to dead state on this input)
 						if (ALPHA(si,k) == NULL && ALPHA(sj,k) == NULL) continue;
 						//different states
-						if (ALPHA(si,k) == NULL || ALPHA(sj,k) == NULL || distinct[ALPHA(si,k)->get_id()][ALPHA(sj,k)->get_id()]){
-							distinct[(*si)->get_id()][(*sj)->get_id()] = true;
+						if (ALPHA(si,k) == NULL || ALPHA(sj,k) == NULL ||DISTINCT(ALPHA(si,k)->get_id(),ALPHA(sj,k)->get_id()) ){
+							DISTINCT((*si)->get_id(),(*sj)->get_id()) = true;
 							change = true;
 							break;
 						}
@@ -295,9 +295,10 @@ void DFA::minimize(){
 		++sj;
 		for (;sj != states->end() ; ++sj){
 			if (done[(*sj)->get_id()]) continue;
-			if (!distinct[(*si)->get_id()][(*sj)->get_id()]){
+			if (!DISTINCT((*si)->get_id(),(*sj)->get_id())){
 				merge_states(*si,*sj,states);
 				done[(*sj)->get_id()] = true;
+				--this->states_count;
 			}
 		}
 	}
@@ -306,9 +307,6 @@ void DFA::minimize(){
 		delete distinct[i];
 	delete distinct;
 	delete done;
-	delete states;
-	states = this->get_numbered_states();
-	this->states_count = states->size();
 	delete states;
 }
 
