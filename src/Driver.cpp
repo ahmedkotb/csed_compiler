@@ -32,13 +32,21 @@ char* Driver::read_file() {
 	//allocate memory
 	char *buffer = new char[BUFFER_SIZE];
 
-	// read data as a block:
 	is.read(buffer, BUFFER_SIZE);
 	//if(buffer[is.gcount()] != 10)
-		//buffer[is.gcount()] = '\0';
+		buffer[is.gcount()] = '\0';
 	//else
-		buffer[is.gcount() -1] = '\0';
+		//buffer[is.gcount() -1] = '\0';
 
+	/*char *buffer_helper = new char[BUFFER_SIZE];
+	char *p = buffer;
+	char *p2 = buffer_helper;
+	while((int)*p != 10)
+	{
+		*p2++ = *p++;
+	}
+	*p2 = '\0';
+*/
 	return buffer;
 }
 
@@ -103,10 +111,9 @@ void Driver::simulate() {
 	forward = buffer1;
 	NFA_State *state = dfa ->get_start_state();
 	int last_accepting = -1;
-	while (simulateDone < 2) {/*!(is.eof() && (forward_counter == BUFFER_SIZE - 1))*/
-		//cout << *lexeme_begin << "  " << *forward << "\n";
+	while (simulateDone < 2) {
+		cout << *lexeme_begin << "  " << *forward << "\n";
 		char input_char = *forward;
-		//cout <<get_buffer_contents(buffer1);
 		//longest matched token
 		if (state ->is_accepting_state())
 			last_accepting = state->get_token_id();
@@ -120,18 +127,24 @@ void Driver::simulate() {
 
 			if (last_accepting == -1) //report exception
 			{
-				fout << "Exception   => " << create_lexem(lexeme_begin ,forward)<<"\n";
+				if(lexeme_begin == forward)
+					fout << "Exception   => " <<  *forward<<"\n";
+				else
+					fout << "Exception   => " <<*lexeme_begin<<  *forward<<"\n";
 				//recover
 				forward++;
 				lexeme_begin++;
 				forward_counter++;
 			} else {
-				lexeme = create_lexem(lexeme_begin, forward );
+				//if(lexeme_begin == forward)
+
+				//else
+					lexeme = create_lexem(lexeme_begin, forward);
 				//get token name
 				token_name = tokens->at(last_accepting);
 
 				symbol_table[lexeme] = token_name;
-				//cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
+				cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
 				if(token_name.compare("White Space") != 0)
 					fout<<token_name<<"\n";
 				lexeme_begin = forward;
