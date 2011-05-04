@@ -130,11 +130,18 @@ void Driver::simulate() {
 				if(lexeme_begin == forward)
 					fout << "Exception   => " <<  *forward<<"\n";
 				else
-					fout << "Exception   => " <<*lexeme_begin<<  *forward<<"\n";
+					fout << "Exception   => " <<create_lexem(lexeme_begin, forward)<<"\n";
 				//recover
-				forward++;
-				lexeme_begin++;
-				forward_counter++;
+				if(forward == lexeme_begin)
+				{
+					forward++;
+					lexeme_begin++;
+					forward_counter++;
+				}
+				else
+				{
+					lexeme_begin = forward;
+				}
 			} else {
 				//if(lexeme_begin == forward)
 
