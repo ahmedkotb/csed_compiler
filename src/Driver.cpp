@@ -117,7 +117,7 @@ void Driver::simulate() {
 
 			if (last_accepting == -1) //report exception
 			{
-				//cout << "Exception   => " << create_lexem(lexeme_begin ,forward)<<"\n";
+				fout << "Exception   => " << create_lexem(lexeme_begin ,forward)<<"\n";
 				//recover
 				forward++;
 				forward_counter++;
@@ -128,7 +128,8 @@ void Driver::simulate() {
 
 				symbol_table[lexeme] = token_name;
 				//cout << "lexem = " << lexeme << "     " << "Token = "<< token_name << "\n";
-				fout<<token_name<<"\n";
+				if(token_name.compare("White Space") != 0)
+					fout<<token_name<<"\n";
 			}
 			last_accepting = -1;
 			state = dfa->get_start_state();
