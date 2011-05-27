@@ -178,6 +178,7 @@ void Driver::simulate() {
 		//handle buffers
 		if (forward_counter == BUFFER_SIZE  && forward_buffer_num == 1) //at end end buffer one
 		{
+			//TODO MEMORY LEAK delete old buffer 2
 			buffer2 = read_file();
 			forward = buffer2;
 			forward_buffer_num = 2;
@@ -186,6 +187,7 @@ void Driver::simulate() {
 
 		} else if (forward_counter == BUFFER_SIZE  && forward_buffer_num == 2) //at end end buffer two
 		{
+			//TODO MEMORY LEAK delete old buffer 1
 			buffer1 = read_file();
 			forward = buffer1;
 			forward_buffer_num = 1;

@@ -1,0 +1,8 @@
+letter = a-z | A-Z | \_
+digit = 0-9
+word = letter (letter|digit)*
+NON_TERMINAL : word
+TERMINAL : \'word\'
+EQUAL : \=
+OR    : \|
+HASH  : #

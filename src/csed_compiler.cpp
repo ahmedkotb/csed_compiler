@@ -11,6 +11,7 @@
 #include "DFA.h"
 #include "Parser.h"
 #include "Driver.h"
+#include "Lexical_Analyser.h"
 using namespace std;
 
 void do_tests();
@@ -19,8 +20,22 @@ int main() {
 
 	cout << "The Best Compiler isA" << endl;
 	cout << "=====================" << endl;
+	Lexical_Analyser lex("./grammer_syntax" , "./input");
 
-	string input_file_path = "./tests/t2";
+	Token * tok = lex.get_next_token();
+	while (tok != NULL){
+		if (tok->get_token_lexeme() == "#") cout << "-------------------------" << endl;
+		cout << tok->get_token_lexeme() << "  >>  " << tok->get_token_type() << endl;
+		tok = lex.get_next_token();
+	}
+	return 0;
+
+}
+
+//the main method we use to deliver phase 1
+void deliver_interface(){
+
+	string input_file_path = "./tests/t1";
 	string source_file_path = "./input";
 
 	//-------------------------------------------------
@@ -39,13 +54,12 @@ int main() {
 	//dfa
 	DFA* dfa = new DFA(nfa);
 	dfa->minimize();
+	dfa->debug();
 	//transition table
 	dfa->write_transition_table("./transition_table",tokens);
 
 	Driver* div = new Driver(dfa,source_file_path,tokens);
 	div->simulate();
-
-	return 0;
 
 }
 void nfa_dfa_tests(){
