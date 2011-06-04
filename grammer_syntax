@@ -1,8 +1,11 @@
 letter = a-z | A-Z | \_
+special_char = \_ | \= | \+ | \- | \* | \/ | \! | \~ | \; | \: | \( | \) | \{ | \} | \|
 digit = 0-9
-word = letter (letter|digit)*
-NON_TERMINAL : word
-TERMINAL : \'word\'
+id = letter (letter|digit)* (\')*
+term = (letter | digit | special_char)+
+EPSILON : \\L
+NON_TERMINAL : id
+TERMINAL : \'term\'
 EQUAL : \=
 OR    : \|
 HASH  : #

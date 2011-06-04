@@ -18,9 +18,9 @@ Lexical_Analyser::Lexical_Analyser(string input_file_path,
 	token_names = output->get_lan_tokens();
 
 	//tokens
-	cout << "Tokens :" << endl;
-	for (it = token_names->begin(); it != token_names->end(); it++)
-		cout << (*it) << endl;
+//	cout << "Tokens :" << endl;
+//	for (it = token_names->begin(); it != token_names->end(); it++)
+//		cout << (*it) << endl;
 
 	//nfa
 	NFA* nfa = output->get_combinedNFA();

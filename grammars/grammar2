@@ -1,0 +1,5 @@
+# bexpr = bterm bexpr'
+# bexpr' = 'or' bterm bexpr' | \L
+# bterm = bfactor bterm'
+# bterm' = 'and' bfactor bterm' | \L 
+# bfactor = 'not' bfactor | '(' bexpr ')' | 'true' | 'false'

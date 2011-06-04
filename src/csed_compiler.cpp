@@ -12,6 +12,8 @@
 #include "Parser.h"
 #include "Driver.h"
 #include "Lexical_Analyser.h"
+#include "CFG.h"
+#include "Predictive_Parser.h"
 using namespace std;
 
 void do_tests();
@@ -20,14 +22,12 @@ int main() {
 
 	cout << "The Best Compiler isA" << endl;
 	cout << "=====================" << endl;
-	Lexical_Analyser lex("./grammer_syntax" , "./input");
 
-	Token * tok = lex.get_next_token();
-	while (tok != NULL){
-		if (tok->get_token_lexeme() == "#") cout << "-------------------------" << endl;
-		cout << tok->get_token_lexeme() << "  >>  " << tok->get_token_type() << endl;
-		tok = lex.get_next_token();
-	}
+	CFG a("./grammars/grammar2");
+	a.debug();
+	cout << "------------------" << endl;
+	Predictive_Parser p(&a);
+	p.debug();
 	return 0;
 
 }
