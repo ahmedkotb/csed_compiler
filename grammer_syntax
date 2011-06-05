@@ -1,5 +1,5 @@
 letter = a-z | A-Z | \_
-special_char = \_ | \= | \+ | \- | \* | \/ | \! | \~ | \; | \: | \( | \) | \{ | \} | \|
+special_char = \_ | \= | \+ | \- | \* | \/ | \! | \~ | \; | \: | \( | \) | \{ | \} | \| | \;
 digit = 0-9
 id = letter (letter|digit)* (\')*
 term = (letter | digit | special_char)+

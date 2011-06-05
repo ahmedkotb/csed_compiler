@@ -23,11 +23,19 @@ int main() {
 	cout << "The Best Compiler isA" << endl;
 	cout << "=====================" << endl;
 
-	CFG a("./grammars/grammar2");
+	string rules_file_path = "./lex_files/t3";
+	string grammar_file_path = "./grammars/grammar1";
+	string source_file_path = "./input";
+
+	CFG a(grammar_file_path);
 	a.debug();
 	cout << "------------------" << endl;
 	Predictive_Parser p(&a);
 	p.debug();
+	cout << "------------------" << endl;
+	p.parse(rules_file_path,source_file_path);
+
+
 	return 0;
 
 }
@@ -35,7 +43,7 @@ int main() {
 //the main method we use to deliver phase 1
 void deliver_interface(){
 
-	string input_file_path = "./tests/t1";
+	string input_file_path = "./lex_files/t1";
 	string source_file_path = "./input";
 
 	//-------------------------------------------------
@@ -159,7 +167,7 @@ void parsing_tests(){
 	//ON WINDOWS
 	//Parsing_output* combined_nfa = p->parse("tests\t1");
 	//ON Linux
-	Parsing_output* output = p->parse("./tests/t2");
+	Parsing_output* output = p->parse("./lex_files/t2");
 	vector<string>::iterator it;
 	vector<string>* tokens = output->get_lan_tokens();
 	cout << "Tokens :" << endl;

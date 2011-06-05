@@ -1,0 +1,6 @@
+#E  = T E'
+#E' = 'addop' T E' | \L
+#T  = F T'
+#T' = 'mulop' F T' | \L
+#F  = '(' E ')' | 'id'
+
